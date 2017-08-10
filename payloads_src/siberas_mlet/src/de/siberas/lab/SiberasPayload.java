@@ -11,7 +11,13 @@ public class SiberasPayload implements SiberasPayloadMBean {
 
 		try {
 			
-			String[] full_cmd = new String[]{"bash","-c",cmd};
+			String[] full_cmd;
+
+			if(System.getProperty("line.separator").equals("\n"))
+				full_cmd = new String[]{"bash","-c",cmd};
+			else // Assumes win
+				full_cmd = new String[]{"cmd.exe","/c",cmd};
+
 			java.lang.Runtime runtime = java.lang.Runtime.getRuntime();
 			java.lang.Process p = runtime.exec(full_cmd);
 

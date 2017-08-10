@@ -151,19 +151,7 @@ def executeCommand(cmd, bean_server):
 
     resource = bean_server.invoke(mlet_bean.getObjectName(), "runCMD", inv_array1, inv_array2)
 
-    # encoded = base64.b64encode('data to be encoded')
-    # encoded
-
-    # data = base64.b64decode(resource)
-    # print data
-    
     print resource
-    # print "ASDASD"
-    # print type(resource)
-    # print len(resource)
-    # # this is ugly, and I need to find a better solution for that...
-    # for res in resource:
-    #     sys.stdout.write(res)
 
     sys.stdout.write("\n")
     sys.stdout.flush()
@@ -198,11 +186,9 @@ def executeJS(js, bean_server):
     inv_array2 = jarray.zeros(1, String)
     inv_array2[0] = String.canonicalName
 
-    # resource = 
-    bean_server.invoke(mlet_bean.getObjectName(), "runJS", inv_array1, inv_array2)
+    resource = bean_server.invoke(mlet_bean.getObjectName(), "runJS", inv_array1, inv_array2)
 
-    # this is ugly, and I need to find a better solution for that...
-    # sys.stdout.write(resource)
+    print resource
 
     sys.stdout.write("\n")
     sys.stdout.flush()
