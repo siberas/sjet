@@ -16,6 +16,7 @@ import jarray
 
 import argparse
 # from cmd import Cmd
+import base64
 
 
 ### AUX ###
@@ -150,9 +151,19 @@ def executeCommand(cmd, bean_server):
 
     resource = bean_server.invoke(mlet_bean.getObjectName(), "runCMD", inv_array1, inv_array2)
 
-    # this is ugly, and I need to find a better solution for that...
-    for res in resource:
-        sys.stdout.write(res)
+    # encoded = base64.b64encode('data to be encoded')
+    # encoded
+
+    # data = base64.b64decode(resource)
+    # print data
+    
+    print resource
+    # print "ASDASD"
+    # print type(resource)
+    # print len(resource)
+    # # this is ugly, and I need to find a better solution for that...
+    # for res in resource:
+    #     sys.stdout.write(res)
 
     sys.stdout.write("\n")
     sys.stdout.flush()
