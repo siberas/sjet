@@ -5,7 +5,7 @@ A JMX exploitation toolkit.
 ## Prerequisites
 
 
-* [Jython](http://www.jython.org/)
+* [Jython 2.7](http://www.jython.org/)
 
 ## Usage
 
