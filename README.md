@@ -3,7 +3,7 @@
 siberas JMX Exploitation Toolkit
 
 sJET allows an easy exploitation of insecure configured JMX services. Additional background
-information can be found [here](https://www.optiv.com/blog/exploiting-jmx-rmi) and [here](https://www.owasp.org/images/c/c1/JMX_-_Java_Management_Extensions_-_Hans-Martin_Muench.pdf)
+information can be found [here](https://www.optiv.com/blog/exploiting-jmx-rmi) and [here](https://www.owasp.org/images/c/c1/JMX_-_Java_Management_Extensions_-_Hans-Martin_Muench.pdf).
 
 ## Prerequisites
 
