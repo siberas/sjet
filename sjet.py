@@ -138,7 +138,7 @@ def MakeHandlerClass(base_url):
 ### /INSTALL MODE ###
 
 
-### COMMAND MODE ###
+### CHANGE PASSWORD MODE ###
 
 def changePasswordMode(args):
     bean_server = connectToJMX(args)
@@ -170,7 +170,7 @@ def changePassword(password, newpass, bean_server):
     sys.stdout.write("\n")
     sys.stdout.flush()
 
-### /COMMAND MODE ###
+### /CHANGE PASSWORD MODE ###
 
 
 ### COMMAND MODE ###
