@@ -5,6 +5,7 @@ from javax.management.remote import JMXConnectorFactory
 from javax.management import ObjectName
 from java.lang import String
 from java.lang import Object
+from java.io import IOException
 
 # BaseHTTPServer needed to serve mlets
 from BaseHTTPServer import BaseHTTPRequestHandler,HTTPServer
@@ -27,10 +28,14 @@ def connectToJMX(args):
     # Basic JMX connection, always required
     jmx_url = JMXServiceURL("service:jmx:rmi:///jndi/rmi://" + args.targetHost + ":" + args.targetPort + "/jmxrmi")
     print "[+] Connecting to: " + str(jmx_url)
-    jmx_connector = JMXConnectorFactory.connect(jmx_url)
-    print "[+] Connected: " + str(jmx_connector.getConnectionId())
-    bean_server = jmx_connector.getMBeanServerConnection()
-    return bean_server
+    try:
+        jmx_connector = JMXConnectorFactory.connect(jmx_url)
+        print "[+] Connected: " + str(jmx_connector.getConnectionId())
+        bean_server = jmx_connector.getMBeanServerConnection()
+        return bean_server
+    except IOException:
+        print "[-] Error: Can't connect to remote service"
+        sys.exit(-1)
 ##########
 
 ### INSTALL MODE ###
