@@ -162,7 +162,7 @@ def changePassword(password, newpass, bean_server):
     resource = bean_server.invoke(mlet_bean.getObjectName(), "changePassword", inv_array1, inv_array2)
 
     if str(resource) == "True":
-        print "[+] Sucessfully changed password"
+        print "[+] Successfully changed password"
     else:
         print "[-] Unable to change password"
 
