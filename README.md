@@ -29,8 +29,8 @@ Where
 * **install** - installs the payload in the current target.
   * *payload_url* - full URL to load the payload
   * *payload_port* - port to load the payload
-  * **password** -  change the password on a already deployed payload
-    * *password* - the new password
+* **password** -  change the password on a already deployed payload
+  * *password* - the new password
 * **command** -  runs the command *CMD* in the targetHost
   * *CMD* - the command to run
 * **shell** - starts a simple shell in targetHost (with the limitations of java's Runtime.exec())
@@ -177,7 +177,7 @@ Feel free to contribute.
 
 ## Authors
 
-* **Hans-Martin Münch** - *Initial idea and work* - [h0ng10](https://github.com/h0ng10)
+* **Hans-Martin Münch** - *Initial idea and work* - [h0ng10](https://twitter.com/h0ng10)
 * **Patricio Reller** - *CLI and extra options* - [preller](https://github.com/preller)
 
 See also the list of [contributors](https://github.com/h0ng10/sjet/graphs/contributors) who participated in this project.
