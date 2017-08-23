@@ -1,4 +1,4 @@
-# SJET by siberas
+# sJET by siberas
 
 siberas JMX Exploitation Toolkit
 
