@@ -26,9 +26,10 @@ Where
 
 ### Modes and modeOptions
 
-* **install** - installs the payload in the current target.
+* **install** - installs the payload in the current target
   * *payload_url* - full URL to load the payload
   * *payload_port* - port to load the payload
+* **uninstall** - uninstalls the payload from the current target
 * **password** -  change the password on a already deployed payload
   * *password* - the new password
 * **command** -  runs the command *CMD* in the targetHost
@@ -170,6 +171,21 @@ sJET - siberas JMX Exploitation Toolkit
 h0ng10@rocksteady:~/sjet$
 ```
 
+### Uninstall the payload MBean from the target
+
+
+Uninstall the payload 'Siberas' from the target:
+
+```
+minmaxer@prellermbp:~/sjet$ jython sjet.py 192.168.1.101 9010 super_secret uninstall
+sJET - siberas JMX Exploitation Toolkit
+=======================================
+[+] Connecting to: service:jmx:rmi:///jndi/rmi://192.168.1.101:9010/jmxrmi
+[+] Connected: rmi://192.168.1.1  16
+[+] MBean correctly uninstalled
+minmaxer@prellermbp:~/sjet$
+```
+	
 
 ## Contributing
 
