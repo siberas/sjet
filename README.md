@@ -195,6 +195,7 @@ Feel free to contribute.
 
 * **Hans-Martin Münch** - *Initial idea and work* - [h0ng10](https://twitter.com/h0ng10)
 * **Patricio Reller** - *CLI and extra options* - [preller](https://github.com/preller)
+* **Ben Campbell** - *Several improvements* - [Meatballs1](https://github.com/Meatballs1)
 
 See also the list of [contributors](https://github.com/h0ng10/sjet/graphs/contributors) who participated in this project.
 
