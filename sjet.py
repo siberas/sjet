@@ -341,14 +341,14 @@ parser = argparse.ArgumentParser(description = 'sJET allows an easy exploitation
 parser.add_argument('targetHost', help='target IP address')
 parser.add_argument('targetPort', help='target JMX service port')
 parser.add_argument('password', help="the required password to access the payload methods")
+parser.add_argument('--jmxrole', help='remote JMX role')
+parser.add_argument('--jmxpassword', help='remote JMX password')
 subparsers = parser.add_subparsers(title='modes', description='valid modes', help='use ... MODE -h for help about specific modes')
 
 # Install mode
 install_subparser = subparsers.add_parser('install', help='install the payload MBean on the target')
 install_subparser.add_argument('payload_url', help='URL to load the payload (full URL)')
 install_subparser.add_argument('payload_port', help='port to load the payload')
-install_subparser.add_argument('--jmxrole', help='remote JMX role')
-install_subparser.add_argument('--jmxpassword', help='remote JMX password')
 
 install_subparser.set_defaults(func=arg_install_mode)
 
