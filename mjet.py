@@ -74,6 +74,7 @@ def installMode(args):
     startWebserver(args)
     bean_server = connectToJMX(args)
     installMBeans(args, bean_server)
+    print "[+] Done"
 
 def installMBeans(args, bean_server):
     # Installation, load javax.management.loading.MLet to install additional MBeans
@@ -176,6 +177,7 @@ def MakeHandlerClass(base_url):
 def uninstallMode(args):
     bean_server = connectToJMX(args)
     uninstallMBeans(bean_server)
+    print "[+] Done"
 
 def uninstallMBeans(bean_server):
     try:
@@ -264,7 +266,7 @@ def scriptMode(args):
         script=myfile.read()
 
     executeJS(args.password, script, bean_server)
-
+    print "[+] Done"
 
 def executeJS(password, js, bean_server):
     # Payload execution
