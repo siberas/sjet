@@ -389,9 +389,9 @@ subparsers = parser.add_subparsers(title='modes', description='valid modes', hel
 
 # Install mode
 install_subparser = subparsers.add_parser('install', help='install the payload MBean on the target')
+install_subparser.add_argument('password', help="the password that should be set after successful installation")
 install_subparser.add_argument('payload_url', help='URL to load the payload (full URL)')
 install_subparser.add_argument('payload_port', help='port to load the payload')
-install_subparser.add_argument('password', help="the password that should be set after successful installation")
 install_subparser.set_defaults(func=arg_install_mode)
 
 # Uninstall mode
