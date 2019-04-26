@@ -1,13 +1,14 @@
-# mJET by MOGWAI LABS
+# MJET by MOGWAI LABS
 
 MOGWAI LABS JMX Exploitation Toolkit
 
-mJET allows an easy exploitation of insecure configured JMX services. Additional background
+MJET allows an easy exploitation of insecure configured JMX services. Additional background
 information can be found [here](https://www.optiv.com/blog/exploiting-jmx-rmi) and [here](https://www.owasp.org/images/c/c1/JMX_-_Java_Management_Extensions_-_Hans-Martin_Muench.pdf).
 
 ## Prerequisites
 
-* [Jython 2.7](http://www.jython.org/)
+* [Jython 2.7](https://www.jython.org/)
+* [Ysoserial](https://github.com/frohoff/ysoserial)
 
 ## Usage
 
@@ -233,6 +234,7 @@ Feel free to contribute.
 * **Patricio Reller** - *CLI and extra options* - [preller](https://github.com/preller)
 * **Ben Campbell** - *Several improvements* - [Meatballs1](https://github.com/Meatballs1)
 * **Arnim Rupp** - *Authentication support*
+* **Sebastian Kindler** - *Deserialization support*
 
 See also the list of [contributors](https://github.com/mogwailabs/sjet/graphs/contributors) who participated in this project.
 
