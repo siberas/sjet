@@ -12,7 +12,7 @@ information can be found [here](https://www.optiv.com/blog/exploiting-jmx-rmi) a
 
 ## Usage
 
-mJET implements a CLI interface (using [argparse](https://docs.python.org/3/library/argparse.html)):
+MJET implements a CLI interface (using [argparse](https://docs.python.org/3/library/argparse.html)):
 
 ```
 jython mjet.py targetHost targetPort password MODE (modeOptions)
@@ -27,7 +27,7 @@ Where
 ### Modes and modeOptions
 
 * **install** - installs the payload in the current target
-  * * *password* - the password that should be set after successful installation
+  * *password* - the password that should be set after successful installation
   * *payload_url* - full URL to load the payload
   * *payload_port* - port to load the payload
 * **uninstall** - uninstalls the payload from the current target
