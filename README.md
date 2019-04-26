@@ -27,7 +27,7 @@ Where
 ### Modes and modeOptions
 
 * **install** - installs the payload in the current target
-  * *password* - 
+  * * *password* - the password that should be set after successful installation
   * *payload_url* - full URL to load the payload
   * *payload_port* - port to load the payload
 * **uninstall** - uninstalls the payload from the current target
