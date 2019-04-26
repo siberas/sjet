@@ -1,4 +1,4 @@
-package de.mogwailabs.mlet;
+package de.mogwailabs.MogwaiLabsMJET;
 
 import javax.script.ScriptEngineManager;
 import java.io.InputStreamReader;
@@ -95,3 +95,4 @@ public class MogwaiLabsPayload implements MogwaiLabsPayloadMBean {
 	}
 
 }
+
