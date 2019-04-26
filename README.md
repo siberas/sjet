@@ -42,7 +42,9 @@ Where
 * **javascript** - runs a javascript file *FILENAME* in the targetHost
   * *password* - the password to access the installed MBean
   * *FILENAME* - the javascript to be run
-
+* **deserialize** - send a ysoserial payload to the target
+  * *gadget* - gadget as provided by ysoserial, e.g., CommonsCollections6
+  * *cmd* - command to be executed
 
 ## Example
 
