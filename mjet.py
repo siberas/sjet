@@ -419,7 +419,7 @@ script_subparser.set_defaults(func=arg_script_mode)
 
 # Shell mode
 shell_subparser = subparsers.add_parser('shell', help='open a simple command shell in the target')
-shell_subparser.add_argument('password', help="the required password to access the payload methods")
+shell_subparser.add_argument('password', help="the required password to access the installed MBean")
 shell_subparser.set_defaults(func=arg_shell_mode)
 
 # Deserialization mode
