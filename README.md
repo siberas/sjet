@@ -21,22 +21,26 @@ Where
 
 * **targetHost** -  the target IP address
 * **targerPort** - the target port where JMX is running
-* **password** - the password that is/was set during installation
 * **MODE** - the script mode
 * **modeOptions** - the options for the mode selected
 
 ### Modes and modeOptions
 
 * **install** - installs the payload in the current target
+  * *password* - 
   * *payload_url* - full URL to load the payload
   * *payload_port* - port to load the payload
 * **uninstall** - uninstalls the payload from the current target
-* **password** -  change the password on a already deployed payload
-  * *password* - the new password
+* **changepw** -  change the password on a already deployed payload
+  * *password* - the password to access the installed MBean
+  * *newpass* - The new password
 * **command** -  runs the command *CMD* in the targetHost
+  * *password* - the password to access the installed MBean
   * *CMD* - the command to run
 * **shell** - starts a simple shell in targetHost (with the limitations of java's Runtime.exec())
+  * *password* - the password to access the installed MBean
 * **javascript** - runs a javascript file *FILENAME* in the targetHost
+  * *password* - the password to access the installed MBean
   * *FILENAME* - the javascript to be run
 
 
