@@ -2,13 +2,16 @@
 
 MOGWAI LABS JMX Exploitation Toolkit
 
+MJET is a forge of sjet, which was developed by siberas but is no longer actively maintained. MJET is maintained by the MOGWAI LABS team which also provided most of the original sjet codebase.
+
+
 MJET allows an easy exploitation of insecure configured JMX services. Additional background
 information can be found [here](https://www.optiv.com/blog/exploiting-jmx-rmi) and [here](https://www.owasp.org/images/c/c1/JMX_-_Java_Management_Extensions_-_Hans-Martin_Muench.pdf).
 
 ## Prerequisites
 
 * [Jython 2.7](https://www.jython.org/)
-* [Ysoserial](https://github.com/frohoff/ysoserial)
+* [Ysoserial](https://github.com/frohoff/ysoserial) (for exploiting deserialisation vulnerabilities via JMX)
 
 ## Usage
 
@@ -23,6 +26,10 @@ Where
 * **targerPort** - the target port where JMX is running
 * **MODE** - the script mode
 * **modeOptions** - the options for the mode selected
+
+Optional arguments (if JMX authentication is enabled):
+* **--jmxrole** - the username
+* **--jmxpassword** - the password
 
 ### Modes and modeOptions
 
@@ -45,7 +52,7 @@ Where
 * **deserialize** - send a ysoserial payload to the target
   * *gadget* - gadget as provided by ysoserial, e.g., CommonsCollections6
   * *cmd* - command to be executed
- * **webserver** - just run the MLET web server
+* **webserver** - just run the MLET web server
   * *payload_url* - full URL to load the payload
   * *payload_port* - port to load the payload
 
