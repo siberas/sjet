@@ -1,4 +1,4 @@
-package de.siberas.lab;
+package de.mogwailabs.MogwaiLabsMJET;
 
 import javax.script.ScriptEngineManager;
 import java.io.InputStreamReader;
@@ -6,12 +6,12 @@ import java.io.StringWriter;
 
 import javax.script.ScriptEngine;
 
-public class SiberasPayload implements SiberasPayloadMBean {
+public class MogwaiLabsPayload implements MogwaiLabsPayloadMBean {
 	
 	private String password;
 
 	
-	public SiberasPayload() {
+	public MogwaiLabsPayload() {
 		password = "I+n33d+a+glass+0f+watta";
 	}
 	
@@ -95,3 +95,4 @@ public class SiberasPayload implements SiberasPayloadMBean {
 	}
 
 }
+

