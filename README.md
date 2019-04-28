@@ -23,7 +23,7 @@ jython mjet.py targetHost targetPort password MODE (modeOptions)
 Where
 
 * **targetHost** -  the target IP address
-* **targerPort** - the target port where JMX is running
+* **targetPort** - the target port where JMX is running
 * **MODE** - the script mode
 * **modeOptions** - the options for the mode selected
 
