@@ -2,7 +2,7 @@
 
 MOGWAI LABS JMX Exploitation Toolkit
 
-MJET is a forge of [sjet](https://github.com/siberas/sjet/), which was developed by siberas but is no longer actively maintained. MJET is maintained by the MOGWAI LABS team which also provided most of the original sjet codebase.
+MJET is a fork of [sjet](https://github.com/siberas/sjet/), which was developed by siberas but is no longer actively maintained. MJET is maintained by the MOGWAI LABS team which also provided most of the original sjet codebase.
 
 
 MJET allows an easy exploitation of insecure configured JMX services. Additional background
