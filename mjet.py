@@ -1,7 +1,4 @@
 # jmx stuff
-from javax.management.remote import JMXServiceURL
-from javax.management.remote import JMXConnector
-from javax.management.remote import JMXConnectorFactory
 from javax.management import ObjectName
 from java.lang import String
 from java.lang import Object
@@ -43,6 +40,43 @@ class TrustAllX509TrustManager(X509TrustManager):
 
 
 ### AUX ###
+#  Source: https://stackoverflow.com/questions/5510939/jython-jmxmp-protocol-support/57377052#57377052
+def importJar(jarFile):
+    from java.net import URL, URLClassLoader
+    from java.lang import ClassLoader
+    from java.io import File
+    m = URLClassLoader.getDeclaredMethod("addURL", [URL])
+    m.accessible = 1
+    m.invoke(ClassLoader.getSystemClassLoader(), [File(jarFile).toURL()])
+
+
+def jmxmp_url(args):
+    try:
+        importJar("opendmk_jmxremote_optional_jar-1.0-b01-ea.jar")
+        print "[+] Imported opendmk_jmxremote_optional_jar-1.0-b01-ea.jar"
+        print "[+] Using JMX Message Protocol"
+    except Exception as e:
+        print "[-] Error importing opendmk_jmxremote_optional_jar-1.0-b01-ea.jar"
+        print e
+        sys.exit(1)
+
+    from javax.management.remote import JMXServiceURL
+
+    jmx_url = JMXServiceURL("service:jmx:jmxmp://" +
+                            args.targetHost + ":" + args.targetPort + "/")
+    return jmx_url
+
+
+def jxmrmi_url(args):
+    print "[+] Using JMX RMI"
+
+    from javax.management.remote import JMXServiceURL
+
+    jmx_url = JMXServiceURL("service:jmx:rmi:///jndi/rmi://" +
+                            args.targetHost + ":" + args.targetPort + "/jmxrmi")
+    return jmx_url
+
+
 def connectToJMX(args):
     # Basic JMX connection, always required
     trust_managers = array([TrustAllX509TrustManager()], TrustManager)
@@ -50,8 +84,15 @@ def connectToJMX(args):
     sc = SSLContext.getInstance("SSL")
     sc.init(None, trust_managers, None)
     SSLContext.setDefault(sc)
-    jmx_url = JMXServiceURL("service:jmx:rmi:///jndi/rmi://" +
-                            args.targetHost + ":" + args.targetPort + "/jmxrmi")
+
+    if args.jmxmp:
+        jmx_url = jmxmp_url(args)
+    else:
+        jmx_url = jmxrmi_url(args)
+
+    # import after url in order to import the correct protocol implementation
+    from javax.management.remote import JMXConnector
+    from javax.management.remote import JMXConnectorFactory
 
     print "[+] Connecting to: " + str(jmx_url)
     try:
@@ -446,6 +487,9 @@ parser.add_argument('targetHost', help='target IP address')
 parser.add_argument('targetPort', help='target JMX service port')
 parser.add_argument('--jmxrole', help='remote JMX role')
 parser.add_argument('--jmxpassword', help='remote JMX password')
+parser.add_argument('--jmxmp', action='store_true',
+                    help='Use JMX Message Protocol')
+
 subparsers = parser.add_subparsers(
     title='modes', description='valid modes', help='use ... MODE -h for help about specific modes')
 

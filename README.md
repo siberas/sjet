@@ -30,6 +30,7 @@ Where
 Optional arguments (if JMX authentication is enabled):
 * **--jmxrole** - the username
 * **--jmxpassword** - the password
+* **--jmxmp** - Use JMX Message Protocol instead of RMI
 
 ### Modes and modeOptions
 
@@ -288,6 +289,7 @@ Feel free to contribute.
 * **Ben Campbell** - *Several improvements* - [Meatballs1](https://github.com/Meatballs1)
 * **Arnim Rupp** - *Authentication support*
 * **Sebastian Kindler** - *Deserialization support*
+* **Karsten Zeides** - *JMX Message Protocol support* [zeides](https://github.com/zeides)
 
 See also the list of [contributors](https://github.com/mogwailabs/sjet/graphs/contributors) who participated in this project.
 
