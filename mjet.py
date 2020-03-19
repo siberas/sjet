@@ -40,28 +40,23 @@ class TrustAllX509TrustManager(X509TrustManager):
 
 
 ### AUX ###
-#  Source: https://stackoverflow.com/questions/5510939/jython-jmxmp-protocol-support/57377052#57377052
-def importJar(jarFile):
+def jmxmp_url(args):
+    print "[+] Using JMX Message Protocol"
+    jarFile = "opendmk_jmxremote_optional_jar-1.0-b01-ea.jar"
+    if not os.path.isfile(jarFile):
+        print "[-] Error: Did not find opendmk_jmxremote_optional_jar-1.0-b01-ea.jar in this folder. Please download it from https://mvnrepository.com/artifact/org.glassfish.external/opendmk_jmxremote_optional_jar/1.0-b01-ea"
+        sys.exit(1)
+
+    #  Source: https://stackoverflow.com/questions/5510939/jython-jmxmp-protocol-support/57377052#57377052
     from java.net import URL, URLClassLoader
     from java.lang import ClassLoader
     from java.io import File
     m = URLClassLoader.getDeclaredMethod("addURL", [URL])
     m.accessible = 1
     m.invoke(ClassLoader.getSystemClassLoader(), [File(jarFile).toURL()])
-
-
-def jmxmp_url(args):
-    try:
-        importJar("opendmk_jmxremote_optional_jar-1.0-b01-ea.jar")
-        print "[+] Imported opendmk_jmxremote_optional_jar-1.0-b01-ea.jar"
-        print "[+] Using JMX Message Protocol"
-    except Exception as e:
-        print "[-] Error importing opendmk_jmxremote_optional_jar-1.0-b01-ea.jar"
-        print e
-        sys.exit(1)
+    print "[+] Imported opendmk_jmxremote_optional_jar-1.0-b01-ea.jar"
 
     from javax.management.remote import JMXServiceURL
-
     jmx_url = JMXServiceURL("service:jmx:jmxmp://" +
                             args.targetHost + ":" + args.targetPort + "/")
     return jmx_url
