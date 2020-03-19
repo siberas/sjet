@@ -12,6 +12,7 @@ information can be found [here](https://www.optiv.com/blog/exploiting-jmx-rmi) a
 
 * [Jython 2.7](https://www.jython.org/)
 * [Ysoserial](https://github.com/frohoff/ysoserial) (for exploiting deserialisation vulnerabilities via JMX)
+* [opendmk_jmxremote_optional_jar-1.0-b01-ea.jar](https://mvnrepository.com/artifact/org.glassfish.external/opendmk_jmxremote_optional_jar/1.0-b01-ea)
 
 ## Usage
 
