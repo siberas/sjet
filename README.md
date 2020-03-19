@@ -31,6 +31,8 @@ Where
 Optional arguments (if JMX authentication is enabled):
 * **--jmxrole** - the username
 * **--jmxpassword** - the password
+
+Optional argument (if target uses JMXMP):
 * **--jmxmp** - Use JMX Message Protocol instead of RMI
 
 ### Modes and modeOptions
