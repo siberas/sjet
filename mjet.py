@@ -6,6 +6,7 @@ from jarray import array
 from java.io import IOException
 from javax.net.ssl import TrustManager, X509TrustManager
 from javax.net.ssl import SSLContext
+from java.lang import System
 # BaseHTTPServer needed to serve mlets
 from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 from threading import Thread
@@ -51,11 +52,18 @@ def jmxmp_url(args):
     from java.net import URL, URLClassLoader
     from java.lang import ClassLoader
     from java.io import File
-    m = URLClassLoader.getDeclaredMethod("addURL", [URL])
-    m.accessible = 1
-    m.invoke(ClassLoader.getSystemClassLoader(), [File(jarFile).toURL()])
-    print "[+] Imported opendmk_jmxremote_optional_jar-1.0-b01-ea.jar"
 
+    java_version = System.getProperty('java.version')
+    if java_version.split(".")[0] < 9:
+        m = URLClassLoader.getDeclaredMethod("addURL", [URL])
+        m.accessible = 1
+        m.invoke(ClassLoader.getSystemClassLoader(), [File(jarFile).toURL()])
+        print "[+] Imported opendmk_jmxremote_optional_jar-1.0-b01-ea.jar"
+    else:
+        print "[-] Your Java version is " + java_version
+        print "[-] Please use Java version < 9 for jmxmp"
+        sys.exit(1)
+        
     from javax.management.remote import JMXServiceURL
     jmx_url = JMXServiceURL("service:jmx:jmxmp://" +
                             args.targetHost + ":" + args.targetPort + "/")
