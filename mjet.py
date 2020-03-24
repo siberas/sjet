@@ -91,7 +91,7 @@ def connectToJMX(args):
     if args.jmxmp:
         jmx_url = jmxmp_url(args)
     else:
-        jmx_url = jmxrmi_url(args)
+        jmx_url = jxmrmi_url(args)
 
     # import after url in order to import the correct protocol implementation
     from javax.management.remote import JMXConnector
