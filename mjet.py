@@ -98,8 +98,7 @@ def connectToJMX(args):
         print "[+] Connected: " + str(jmx_connector.getConnectionId())
         bean_server = jmx_connector.getMBeanServerConnection()
         return bean_server
-    except Exception as e:
-        print e
+    except:
         print "[-] Error: Can't connect to remote service"
 
         if "Authentication failed! Invalid username or password" in str(sys.exc_info()[1]):
