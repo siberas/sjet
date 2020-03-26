@@ -283,15 +283,17 @@ MJET - MOGWAI LABS JMX Exploitation Toolkit
 
 ```
 
+### JMX message protocol
+
+Download [opendmk_jmxremote_optional_jar-1.0-b01-ea.jar](https://mvnrepository.com/artifact/org.glassfish.external/opendmk_jmxremote_optional_jar/1.0-b01-ea) and mopve it into the jars directory. You need to add it to the classpath via `java -cp`.
+
+```bash
+java -cp jython.jar:jars/opendmk_jmxremote_optional_jar-1.0-b01-ea.jar org.python.util.jython mjet.py shell mypass
+```
+
 ## Contributing
 
 Feel free to contribute.
-
-## Known issues
-
-JMXMP: To import the opendmk_jmxremote_optional_jar-1.0-b01-ea.jar in Jython the URLClassLoader is used. However, in Java 9 the implementation of the ClassLoader was modified (https://docs.oracle.com/javase/9/migrate/toc.htm).
-Solution for Java 9: It's possible to create a custom ClassLoader and override the system class loader: https://stackoverflow.com/a/59743937
-Therefore the suggestion is to use Java 8 with the JMX Message Protocol.
 
 ## Authors
 

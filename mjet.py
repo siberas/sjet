@@ -44,7 +44,7 @@ class TrustAllX509TrustManager(X509TrustManager):
 def jmxmp_url(args):
     print "[+] Using JMX Message Protocol"
     if not os.path.isfile("./jars/opendmk_jmxremote_optional_jar-1.0-b01-ea.jar"):
-        print "[-] Error: Did not find opendmk_jmxremote_optional_jar-1.0-b01-ea.jar in jars folder. Please download it from https://mvnrepository.com/artifact/org.glassfish.external/opendmk_jmxremote_optional_jar/1.0-b01-ea and move it into the jars folder"
+        print "[-] Error: Did not find opendmk_jmxremote_optional_jar-1.0-b01-ea.jar in jars directory. Please download it from https://mvnrepository.com/artifact/org.glassfish.external/opendmk_jmxremote_optional_jar/1.0-b01-ea and move it into the jars directory"
         print "[-] Example: java -cp jython.jar:jars/opendmk_jmxremote_optional_jar-1.0-b01-ea.jar org.python.util.jython mjet.py ..."
         sys.exit(1)
 
@@ -382,7 +382,7 @@ def startShell(password, bean_server):
 def deserializationMode(args):
 
     if not os.path.isfile('./jars/ysoserial.jar'):
-        print "[-] Error: Did not find ysoserial.jar in jars folder. Please download it from https://github.com/frohoff/ysoserial and move it in the jars folder"
+        print "[-] Error: Did not find ysoserial.jar in jars directory. Please download it from https://github.com/frohoff/ysoserial and move it in the jars directory"
         sys.exit(1)
 
     sys.path.append("./jars/ysoserial.jar")
