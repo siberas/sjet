@@ -32,9 +32,7 @@ Optional arguments (if JMX authentication is enabled):
 * **--jmxrole** - the username
 * **--jmxpassword** - the password
 
-Optional argument (if target uses JMXMP,
-  requires local Java version < 9, 
-  remote server Java version does not matter):
+Optional argument (if target uses JMXMP):
 * **--jmxmp** - no arguments
 
 ### Modes and modeOptions
