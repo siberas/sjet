@@ -283,7 +283,7 @@ MJET - MOGWAI LABS JMX Exploitation Toolkit
 
 ### JMX message protocol
 
-Download [opendmk_jmxremote_optional_jar-1.0-b01-ea.jar](https://mvnrepository.com/artifact/org.glassfish.external/opendmk_jmxremote_optional_jar/1.0-b01-ea) and mopve it into the jars directory. You need to add it to the classpath via `java -cp`.
+Download [opendmk_jmxremote_optional_jar-1.0-b01-ea.jar](https://mvnrepository.com/artifact/org.glassfish.external/opendmk_jmxremote_optional_jar/1.0-b01-ea) and move it into the jars directory. You need to add it to the classpath via `java -cp`.
 
 ```bash
 java -cp jython.jar:jars/opendmk_jmxremote_optional_jar-1.0-b01-ea.jar org.python.util.jython mjet.py shell mypass
