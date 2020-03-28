@@ -24,6 +24,9 @@ import base64
 import random
 import string
 
+# Socket to generate a proxy for localhost bypasses
+import socket
+
 
 authorSignature = 'MJET - MOGWAI LABS JMX Exploitation Toolkit\n'
 authorSignature += '==========================================='
@@ -103,6 +106,9 @@ def connectToJMX(args):
 
         if "Authentication failed! Invalid username or password" in str(sys.exc_info()[1]):
             print "[-] Authentication failed! Invalid username or password"
+
+        if "Connection refused to host: 127.0.0.1" in str(sys.exc_info()):
+            print "[-] Connection refused to 127.0.0.1! Try the localhost_bypass"
 
         sys.exit(-1)
 ##########
@@ -429,6 +435,53 @@ def deserializationMode(args):
 
 ### /DESERIALIZATION MODE ###
 
+
+### Proxy for localhost bypass ###
+
+
+def runProxy(target, port):
+    try:
+        # server socket
+        server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        server.bind(("127.0.0.1", port))
+        server.listen(1)
+        local_socket, address = server.accept()
+
+        # client socket
+        remote_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        remote_socket.connect((target, port))
+    except socket.error as e:
+        print "[-] Error: Failed to start localhost proxy with port " + str(port)
+        if "Address already in use" in e:
+            print "[-] Port " + str(port) + " is already in use!"
+        sys.exit(1)  # kil the thread
+
+    local_to_remote = Thread(
+        target=proxyHandler, args=(local_socket, remote_socket))
+    local_to_remote.daemon = True
+    local_to_remote.start()
+
+    remote_to_local = Thread(
+        target=proxyHandler, args=(remote_socket, local_socket))
+    remote_to_local.daemon = True
+    remote_to_local.start()
+
+    print "[+] Started localhost proxy on port " + str(port)
+
+
+
+def proxyHandler(source, dest):
+    while 1:
+        try:
+            data = source.recv(1024)
+            if not data:
+                break
+            dest.send(data)
+        except:
+            break
+
+### /Proxy for localhost bypass ###
+
 ### PARSER ###
 # Map for clarity's sake
 
@@ -478,6 +531,13 @@ parser.add_argument('--jmxrole', help='remote JMX role')
 parser.add_argument('--jmxpassword', help='remote JMX password')
 parser.add_argument('--jmxmp', action='store_true',
                     help='Use JMX Message Protocol')
+parser.add_argument('--localhost_bypass',
+                    default=None,
+                    dest="localhost_bypass_port",
+                    action='store',
+                    nargs='?',
+                    type=int,
+                    help='JMX RemoteObject port')
 
 subparsers = parser.add_subparsers(
     title='modes', description='valid modes', help='use ... MODE -h for help about specific modes')
@@ -549,4 +609,12 @@ deserialize_subparser.set_defaults(func=arg_deserialization_mode)
 
 # Store the user args
 args = parser.parse_args()
+
+if args.localhost_bypass_port:
+    proxyServer = Thread(
+        target=runProxy, args=(args.targetHost, args.localhost_bypass_port))
+    proxyServer.daemon = True
+    proxyServer.start()
+
+    
 args.func(args)

