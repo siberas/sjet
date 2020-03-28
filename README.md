@@ -12,6 +12,7 @@ information can be found [here](https://www.optiv.com/blog/exploiting-jmx-rmi) a
 
 * [Jython 2.7](https://www.jython.org/)
 * [Ysoserial](https://github.com/frohoff/ysoserial) (for exploiting deserialisation vulnerabilities via JMX)
+* [opendmk_jmxremote_optional_jar-1.0-b01-ea.jar](https://mvnrepository.com/artifact/org.glassfish.external/opendmk_jmxremote_optional_jar/1.0-b01-ea) (to support the alternative JMX Message Protocol (JMXMP))
 
 ## Usage
 
@@ -30,6 +31,9 @@ Where
 Optional arguments (if JMX authentication is enabled):
 * **--jmxrole** - the username
 * **--jmxpassword** - the password
+
+Optional argument (if target uses JMXMP):
+* **--jmxmp** - no arguments
 
 ### Modes and modeOptions
 
@@ -277,6 +281,14 @@ MJET - MOGWAI LABS JMX Exploitation Toolkit
 
 ```
 
+### JMX message protocol
+
+Download [opendmk_jmxremote_optional_jar-1.0-b01-ea.jar](https://mvnrepository.com/artifact/org.glassfish.external/opendmk_jmxremote_optional_jar/1.0-b01-ea) and move it into the jars directory. You need to add this directory to the classpath via `java -cp`.
+
+```bash
+java -cp "jython.jar:jars/*" org.python.util.jython mjet.py shell mypass
+```
+
 ## Contributing
 
 Feel free to contribute.
@@ -288,6 +300,7 @@ Feel free to contribute.
 * **Ben Campbell** - *Several improvements* - [Meatballs1](https://github.com/Meatballs1)
 * **Arnim Rupp** - *Authentication support*
 * **Sebastian Kindler** - *Deserialization support*
+* **Karsten Zeides** - *JMX Message Protocol support* [zeides](https://github.com/zeides)
 
 See also the list of [contributors](https://github.com/mogwailabs/sjet/graphs/contributors) who participated in this project.
 
