@@ -51,7 +51,7 @@ def jmxmp_url(args):
         print "[-] Example: java -cp jython.jar:jars/opendmk_jmxremote_optional_jar-1.0-b01-ea.jar org.python.util.jython mjet.py ..."
         sys.exit(1)
 
-    print "[+] Using opendmk_jmxremote_optional_jar-1.0-b01-ea.jar
+    print "[+] Using opendmk_jmxremote_optional_jar-1.0-b01-ea.jar"
         
     from javax.management.remote import JMXServiceURL
     jmx_url = JMXServiceURL("service:jmx:jmxmp://" +
