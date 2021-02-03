@@ -5,4 +5,5 @@ RUN apt-get update && apt-get install -y jython wget git && rm -rf /var/lib/apt/
 COPY . /app
 RUN wget https://jitpack.io/com/github/frohoff/ysoserial/master-SNAPSHOT/ysoserial-master-SNAPSHOT.jar -O /app/jars/ysoserial.jar
 EXPOSE 8000
-CMD jython /app/mjet.py
+WORKDIR /app
+ENTRYPOINT ["jython", "mjet.py"]
