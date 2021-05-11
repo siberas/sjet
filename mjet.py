@@ -65,7 +65,7 @@ def jxmrmi_url(args):
     from javax.management.remote import JMXServiceURL
 
     jmx_url = JMXServiceURL("service:jmx:rmi:///jndi/rmi://" +
-                            args.targetHost + ":" + args.targetPort + "/jmxrmi")
+                            args.targetHost + ":" + args.targetPort + "/" + args.rmiObjectName)
     return jmx_url
 
 
@@ -576,6 +576,7 @@ parser.add_argument('--jmxrole', help='remote JMX role')
 parser.add_argument('--jmxpassword', help='remote JMX password')
 parser.add_argument('--jmxmp', action='store_true',
                     help='Use JMX Message Protocol')
+parser.add_argument('--rmiObjectName', help='RMI name of the JMX endpoint', default='jmxrmi')
 parser.add_argument('--localhost_bypass',
                     default=None,
                     dest="localhost_bypass_port",
