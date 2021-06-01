@@ -380,7 +380,7 @@ def startShell(password, bean_server):
         if cmd == 'exit_shell':
             in_command_loop = False
         else:
-            executeCommand(password, cmd, bean_server)
+            executeCommand(password, cmd, bean_server, args.shell)
 
 ### /SHELL MODE ###
 
