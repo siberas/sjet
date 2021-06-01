@@ -424,6 +424,8 @@ Feel free to contribute.
 * **Arnim Rupp** - *Authentication support*
 * **Sebastian Kindler** - *Deserialization support*
 * **Karsten Zeides** - *JMX Message Protocol support, localhost bypass* [zeides](https://github.com/zeides)
+* **g60ocR** - *Docker file* [g60ocR](https://github.com/g60ocR)
+* **Morn98** - *Shell and RMI selection* [Morn98](https://github.com/Morn98))
 
 See also the list of [contributors](https://github.com/mogwailabs/sjet/graphs/contributors) who participated in this project.
 
