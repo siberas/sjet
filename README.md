@@ -425,6 +425,8 @@ docker run mjet
 docker run mjet 10.165.188.23 2222 install super_secret http://10.165.188.1:8000 8000
 ```
 
+By default the docker image exposes port 8000 for the HTTP server. If you need another port you need to remember to expose it!
+
 ## Contributing
 
 Feel free to contribute.
