@@ -4,9 +4,12 @@ MOGWAI LABS JMX Exploitation Toolkit
 
 MJET is a fork of [sjet](https://github.com/siberas/sjet/), which was developed by siberas but is no longer actively maintained. MJET is maintained by the MOGWAI LABS team which also provided most of the original sjet codebase.
 
-
 MJET allows an easy exploitation of insecure configured JMX services. Additional background
 information can be found [here](https://www.optiv.com/blog/exploiting-jmx-rmi) and [here](https://www.owasp.org/images/c/c1/JMX_-_Java_Management_Extensions_-_Hans-Martin_Muench.pdf).
+
+## !!! Important: This project is no longer maintained
+This repository is **no longer activly maintained**. We recommend using [qtcs beanshooter](https://github.com/qtc-de/beanshooter) instead. 
+
 
 ## Prerequisites
 
